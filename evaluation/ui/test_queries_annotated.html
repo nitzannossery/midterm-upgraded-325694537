@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... existing head content ... -->
+</head>
+<body>
+    <div class="container">
+        <!-- ... header and nav ... -->
+        
+        <div class="content">
+            <!-- ... stats and search ... -->
+            
+            <!-- ============================================ -->
+            <!-- MARKET DATA AGENT SECTION -->
+            <!-- ============================================ -->
+            <div class="agent-section" data-agent="market">
+                <div class="agent-header">
+                    <h2>📊 Market Data Agent</h2>
+                    <p>Hard Tests + Retrieval Tests (69 total)</p>
+                </div>
+                
+                <!-- ⬇️ INSERT NEW HARD TESTS HERE (around line 278) -->
+                <div class="test-category">
+                    <h3>Hard Tests <span class="test-type type-hard">Hard</span></h3>
+                    
+                    <!-- EXAMPLE: Copy this structure to add a new test -->
+                    <div class="test-item">
+                        <div class="test-id">market_XXX</div>
+                        <div class="test-query">Your new test query here</div>
+                        <div class="test-meta">
+                            <span class="meta-badge">Symbol: AAPL</span>
+                            <span class="meta-badge">Date: 2024-01-15</span>
+                        </div>
+                    </div>
+                    <!-- ⬆️ END OF EXAMPLE - Add your tests above this comment -->
+                    
+                </div>
+                
+                <!-- ⬇️ INSERT NEW RETRIEVAL TESTS HERE (around line 350) -->
+                <div class="test-category">
+                    <h3>Retrieval Tests <span class="test-type type-retrieval">Retrieval</span></h3>
+                    
+                    <!-- EXAMPLE: Copy this structure to add a new retrieval test -->
+                    <div class="test-item">
+                        <div class="test-id">market_retrieval_XXX</div>
+                        <div class="test-query">Your retrieval test query here</div>
+                        <div class="test-meta">
+                            <span class="meta-badge">Check: Ticker mentioned</span>
+                            <span class="meta-badge">Check: Date range correct</span>
+                        </div>
+                    </div>
+                    <!-- ⬆️ END OF EXAMPLE -->
+                    
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- FUNDAMENTAL & NEWS AGENT SECTION -->
+            <!-- ============================================ -->
+            <div class="agent-section" data-agent="fundamental">
+                <div class="agent-header">
+                    <h2>📈 Fundamental & News Agent</h2>
+                    <p>Hard Tests + LLM Tests + Retrieval Tests (67 total)</p>
+                </div>
+                
+                <!-- ⬇️ INSERT NEW LLM TESTS HERE (around line 450) -->
+                <div class="test-category">
+                    <h3>LLM Tests <span class="test-type type-llm">LLM</span></h3>
+                    
+                    <!-- EXAMPLE: Copy this structure -->
+                    <div class="test-item">
+                        <div class="test-id">fundamental_llm_XXX</div>
+                        <div class="test-query">Your LLM test query here</div>
+                        <div class="test-meta">
+                            <span class="meta-badge">Type: Analysis type</span>
+                        </div>
+                    </div>
+                    <!-- ⬆️ END OF EXAMPLE -->
+                    
+                </div>
+                
+                <!-- ⬇️ INSERT NEW RETRIEVAL TESTS HERE (around line 500) -->
+                <div class="test-category">
+                    <h3>Retrieval Tests <span class="test-type type-retrieval">Retrieval</span></h3>
+                    
+                    <!-- EXAMPLE: Copy this structure -->
+                    <div class="test-item">
+                        <div class="test-id">fundamental_retrieval_XXX</div>
+                        <div class="test-query">Your retrieval test query here</div>
+                        <div class="test-meta">
+                            <span class="meta-badge">Check: Claims supported</span>
+                        </div>
+                    </div>
+                    <!-- ⬆️ END OF EXAMPLE -->
+                    
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- PORTFOLIO & RISK AGENT SECTION -->
+            <!-- ============================================ -->
+            <div class="agent-section" data-agent="portfolio">
+                <!-- ⬇️ INSERT NEW PORTFOLIO TESTS HERE (around line 550) -->
+                <!-- Similar structure as above -->
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- SUMMARIZER AGENT SECTION -->
+            <!-- ============================================ -->
+            <div class="agent-section" data-agent="summarizer">
+                <!-- ⬇️ INSERT NEW SUMMARIZER TESTS HERE (around line 650) -->
+                <!-- Similar structure as above -->
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- SYSTEM-LEVEL TESTS SECTION -->
+            <!-- ============================================ -->
+            <div class="agent-section" data-agent="system">
+                <!-- ⬇️ INSERT NEW SYSTEM TESTS HERE (around line 750) -->
+                <!-- Similar structure as above -->
+            </div>
+            
+        </div>
+    </div>
+</body>
+</html>

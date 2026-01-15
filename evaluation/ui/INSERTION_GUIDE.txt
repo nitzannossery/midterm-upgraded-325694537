@@ -1,0 +1,97 @@
+═══════════════════════════════════════════════════════════════
+WHERE TO INSERT TEST QUERIES IN test_queries.html
+═══════════════════════════════════════════════════════════════
+
+FILE: evaluation/ui/test_queries.html
+
+┌─────────────────────────────────────────────────────────────┐
+│ 1. MARKET DATA AGENT - HARD TESTS                          │
+│    Location: Line ~278-350                                  │
+│    Look for: <h3>Hard Tests <span class="test-type...      │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 2. MARKET DATA AGENT - RETRIEVAL TESTS                     │
+│    Location: Line ~350-400                                 │
+│    Look for: <h3>Retrieval Tests <span class="test-type... │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 3. FUNDAMENTAL AGENT - LLM TESTS                           │
+│    Location: Line ~450-500                                 │
+│    Look for: <h3>LLM Tests <span class="test-type...      │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 4. FUNDAMENTAL AGENT - RETRIEVAL TESTS                     │
+│    Location: Line ~500-550                                 │
+│    Look for: <h3>Retrieval Tests <span class="test-type... │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 5. PORTFOLIO AGENT - HARD TESTS                            │
+│    Location: Line ~550-600                                 │
+│    Look for: <h3>Hard Tests <span class="test-type...      │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 6. PORTFOLIO AGENT - LLM TESTS                             │
+│    Location: Line ~600-650                                 │
+│    Look for: <h3>LLM Tests <span class="test-type...       │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 7. SUMMARIZER AGENT - LLM TESTS                            │
+│    Location: Line ~650-700                                 │
+│    Look for: <h3>LLM Tests <span class="test-type...        │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 8. SUMMARIZER AGENT - HUMAN TESTS                          │
+│    Location: Line ~700-750                                 │
+│    Look for: <h3>Human Tests <span class="test-type...    │
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 9. SYSTEM - CROSS-AGENT TESTS                              │
+│    Location: Line ~750-800                                 │
+│    Look for: <h3>Cross-Agent Tests <span class="test-type..│
+│    Insert after existing test-item divs                     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 10. SYSTEM - REGRESSION TESTS                              │
+│     Location: Line ~800-850                                │
+│     Look for: <h3>Regression Tests <span class="test-type..│
+│     Insert after existing test-item divs                    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ 11. SYSTEM - EDGE CASES                                    │
+│     Location: Line ~850-900                                 │
+│     Look for: <h3>Edge Cases <span class="test-type...     │
+│     Insert after existing test-item divs                    │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+TEMPLATE TO COPY:
+═══════════════════════════════════════════════════════════════
+
+<div class="test-item">
+    <div class="test-id">YOUR_TEST_ID</div>
+    <div class="test-query">Your test query question here</div>
+    <div class="test-meta">
+        <span class="meta-badge">Metadata 1</span>
+        <span class="meta-badge">Metadata 2</span>
+    </div>
+</div>
+
+═══════════════════════════════════════════════════════════════

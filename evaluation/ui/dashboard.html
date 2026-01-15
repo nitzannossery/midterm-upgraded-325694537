@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Multi-Agent System - Evaluation Dashboard</title>
+    <title>Financial Multi-Agent System - User Interface</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -44,127 +44,92 @@
             opacity: 0.9;
         }
         
-        .nav {
-            background: #f8f9fa;
-            padding: 20px 40px;
-            border-bottom: 2px solid #e9ecef;
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .nav a {
-            padding: 12px 24px;
-            background: white;
-            border: 2px solid #667eea;
-            color: #667eea;
-            text-decoration: none;
+        .notice {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 40px;
             border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
+            color: #856404;
         }
         
-        .nav a:hover, .nav a.active {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .notice strong {
+            display: block;
+            margin-bottom: 5px;
         }
         
         .content {
             padding: 40px;
         }
         
-        .agent-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+        .query-section {
             margin-bottom: 40px;
         }
         
-        .agent-card {
-            background: white;
+        .query-input {
+            width: 100%;
+            padding: 20px;
             border: 2px solid #e9ecef;
             border-radius: 12px;
-            padding: 30px;
+            font-size: 1.1em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
             transition: all 0.3s;
-            cursor: pointer;
         }
         
-        .agent-card:hover {
+        .query-input:focus {
+            outline: none;
             border-color: #667eea;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        .agent-card h3 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .query-input::placeholder {
+            color: #adb5bd;
         }
         
-        .agent-card .icon {
-            font-size: 2em;
-        }
-        
-        .test-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+        .examples {
             margin-top: 20px;
-        }
-        
-        .stat {
+            padding: 20px;
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
+            border-radius: 12px;
         }
         
-        .stat-label {
-            font-size: 0.9em;
+        .examples h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .example-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .example-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .example-item .category {
+            font-size: 0.85em;
             color: #6c757d;
             margin-bottom: 5px;
         }
         
-        .stat-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-top: 15px;
-        }
-        
-        .status-pass {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-fail {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
+        .example-item .query {
+            font-weight: 500;
+            color: #495057;
         }
         
         .actions {
-            margin-top: 30px;
             display: flex;
             gap: 15px;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
         
         .btn {
@@ -175,8 +140,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
         }
         
         .btn-primary {
@@ -199,29 +162,36 @@
             background: #5a6268;
         }
         
-        .system-tests {
+        .response-section {
             margin-top: 40px;
             padding: 30px;
             background: #f8f9fa;
             border-radius: 12px;
+            display: none;
         }
         
-        .system-tests h2 {
+        .response-section.active {
+            display: block;
+        }
+        
+        .response-section h3 {
             color: #667eea;
             margin-bottom: 20px;
         }
         
-        .test-category {
+        .response-content {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            margin-bottom: 15px;
             border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            line-height: 1.6;
         }
         
-        .test-category h4 {
-            color: #495057;
-            margin-bottom: 10px;
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
         }
         
         .footer {
@@ -231,168 +201,153 @@
             color: #6c757d;
             border-top: 2px solid #e9ecef;
         }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🧪 Financial Multi-Agent System</h1>
-            <p>Comprehensive Evaluation Dashboard</p>
+            <h1>🤖 Financial Multi-Agent System</h1>
+            <p>Ask Real Financial Questions - Inference Mode</p>
         </div>
         
-        <div class="nav">
-            <a href="dashboard.html" class="active">Dashboard</a>
-            <a href="test_queries.html">Test Queries</a>
-            <a href="results.html">Results</a>
-            <a href="config.html">Configuration</a>
+        <div class="notice">
+            <strong>⚠️ Important:</strong>
+            This UI is for <strong>real user inference only</strong>. 
+            Evaluation test cases are executed offline via evaluation runners (CLI/CI/CD).
+            See <code>evaluation/runners/</code> for evaluation framework.
         </div>
         
         <div class="content">
-            <h2 style="color: #667eea; margin-bottom: 30px;">Agent Evaluation Status</h2>
-            
-            <div class="agent-grid">
-                <div class="agent-card">
-                    <h3><span class="icon">📊</span> Market Data Agent</h3>
-                    <p>Retrieves prices, volume, returns, benchmarks, and FX data</p>
-                    <div class="test-stats">
-                        <div class="stat">
-                            <div class="stat-label">Hard Tests</div>
-                            <div class="stat-value">32</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Retrieval</div>
-                            <div class="stat-value">15</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Total</div>
-                            <div class="stat-value">69</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Pass Rate</div>
-                            <div class="stat-value">-</div>
-                        </div>
+            <div class="query-section">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Enter Your Financial Question</h2>
+                
+                <textarea 
+                    id="queryInput" 
+                    class="query-input" 
+                    placeholder="Ask any financial question, for example:&#10;&#10;• Should I invest in AAPL?&#10;• What is the risk profile of a portfolio with 50% AAPL and 50% MSFT?&#10;• Compare the performance of TSLA vs the S&P 500 over the last 6 months&#10;• What are the key financial risks for Microsoft?&#10;• Analyze revenue growth and margins for Google"
+                ></textarea>
+                
+                <div class="examples">
+                    <h3>Example User Queries (Click to Use)</h3>
+                    
+                    <div class="example-item" onclick="setQuery('Should I invest in AAPL? Consider market trends, fundamentals, and risk.')">
+                        <div class="category">Investment Decision</div>
+                        <div class="query">Should I invest in AAPL? Consider market trends, fundamentals, and risk.</div>
                     </div>
-                    <span class="status-badge status-pending">Pending</span>
+                    
+                    <div class="example-item" onclick="setQuery('What is the risk profile of a portfolio with 50% AAPL, 30% MSFT, and 20% GOOGL?')">
+                        <div class="category">Portfolio Analysis</div>
+                        <div class="query">What is the risk profile of a portfolio with 50% AAPL, 30% MSFT, and 20% GOOGL?</div>
+                    </div>
+                    
+                    <div class="example-item" onclick="setQuery('Compare TSLA performance vs S&P 500 over the last 6 months')">
+                        <div class="category">Performance Comparison</div>
+                        <div class="query">Compare TSLA performance vs S&P 500 over the last 6 months</div>
+                    </div>
+                    
+                    <div class="example-item" onclick="setQuery('What are the key financial risks mentioned in Microsoft recent filings?')">
+                        <div class="category">Risk Analysis</div>
+                        <div class="query">What are the key financial risks mentioned in Microsoft recent filings?</div>
+                    </div>
+                    
+                    <div class="example-item" onclick="setQuery('Analyze revenue growth, margins, and debt levels for Google')">
+                        <div class="category">Fundamental Analysis</div>
+                        <div class="query">Analyze revenue growth, margins, and debt levels for Google</div>
+                    </div>
                 </div>
                 
-                <div class="agent-card">
-                    <h3><span class="icon">📈</span> Fundamental & News Agent</h3>
-                    <p>Extracts financial statements, ratios, and company news</p>
-                    <div class="test-stats">
-                        <div class="stat">
-                            <div class="stat-label">Hard Tests</div>
-                            <div class="stat-value">25</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">LLM Tests</div>
-                            <div class="stat-value">20</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Retrieval</div>
-                            <div class="stat-value">15</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Total</div>
-                            <div class="stat-value">67</div>
-                        </div>
-                    </div>
-                    <span class="status-badge status-pending">Pending</span>
-                </div>
-                
-                <div class="agent-card">
-                    <h3><span class="icon">⚖️</span> Portfolio & Risk Agent</h3>
-                    <p>Computes risk metrics and investment recommendations</p>
-                    <div class="test-stats">
-                        <div class="stat">
-                            <div class="stat-label">Hard Tests</div>
-                            <div class="stat-value">31</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">LLM Tests</div>
-                            <div class="stat-value">18</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Total</div>
-                            <div class="stat-value">56</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Pass Rate</div>
-                            <div class="stat-value">-</div>
-                        </div>
-                    </div>
-                    <span class="status-badge status-pending">Pending</span>
-                </div>
-                
-                <div class="agent-card">
-                    <h3><span class="icon">📝</span> Summarizer Agent</h3>
-                    <p>Synthesizes outputs from all agents into coherent answer</p>
-                    <div class="test-stats">
-                        <div class="stat">
-                            <div class="stat-label">LLM Tests</div>
-                            <div class="stat-value">19</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Human Tests</div>
-                            <div class="stat-value">11</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Total</div>
-                            <div class="stat-value">30</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Pass Rate</div>
-                            <div class="stat-value">-</div>
-                        </div>
-                    </div>
-                    <span class="status-badge status-pending">Pending</span>
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="submitQuery()">Submit Query</button>
+                    <button class="btn btn-secondary" onclick="clearQuery()">Clear</button>
                 </div>
             </div>
             
-            <div class="actions">
-                <a href="test_queries.html" class="btn btn-primary">View Test Queries →</a>
-                <button class="btn btn-secondary" onclick="runAllTests()">Run All Tests</button>
-                <button class="btn btn-secondary" onclick="runSystemTests()">Run System Tests</button>
-            </div>
-            
-            <div class="system-tests">
-                <h2>System-Level Tests</h2>
-                
-                <div class="test-category">
-                    <h4>🔄 Cross-Agent / System-Level Tests (4 tests)</h4>
-                    <p>Tests orchestrator and system integration</p>
-                    <span class="status-badge status-pending">Pending</span>
-                </div>
-                
-                <div class="test-category">
-                    <h4>🔄 Regression / CI Tests (4 tests)</h4>
-                    <p>Tests to ensure changes don't break existing functionality</p>
-                    <span class="status-badge status-pending">Pending</span>
-                </div>
-                
-                <div class="test-category">
-                    <h4>⚠️ Edge & Failure Cases (4 tests)</h4>
-                    <p>Tests for error handling and edge cases</p>
-                    <span class="status-badge status-pending">Pending</span>
+            <div id="responseSection" class="response-section">
+                <h3>Response</h3>
+                <div id="responseContent" class="response-content">
+                    <div class="loading">Processing your query...</div>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p>Financial Multi-Agent System Evaluation Framework | Total: 234+ Test Cases</p>
+            <p><strong>Financial Multi-Agent System</strong> | Inference Mode</p>
             <p style="margin-top: 10px; font-size: 0.9em;">
-                Repository: <a href="https://github.com/nitzannossery/midterm-upgraded-325694537" target="_blank" style="color: #667eea;">GitHub</a>
+                Evaluation framework: <a href="https://github.com/nitzannossery/midterm-upgraded-325694537" target="_blank">GitHub Repository</a> | 
+                <a href="../README.md" target="_blank">Documentation</a>
+            </p>
+            <p style="margin-top: 10px; font-size: 0.85em; color: #adb5bd;">
+                Note: This UI accepts real user queries only. Test cases are executed via evaluation runners.
             </p>
         </div>
     </div>
     
     <script>
-        function runAllTests() {
-            alert('Running all tests...\n\nThis would execute: python evaluation/runners/run_all_evals.py');
+        function setQuery(query) {
+            document.getElementById('queryInput').value = query;
         }
         
-        function runSystemTests() {
-            alert('Running system tests...\n\nThis would execute: python evaluation/runners/run_system_tests.py');
+        function clearQuery() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('responseSection').classList.remove('active');
         }
+        
+        function submitQuery() {
+            const query = document.getElementById('queryInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            // Show response section
+            const responseSection = document.getElementById('responseSection');
+            const responseContent = document.getElementById('responseContent');
+            
+            responseSection.classList.add('active');
+            responseContent.innerHTML = '<div class="loading">Processing your query... This is a demo UI. In production, this would call the multi-agent system.</div>';
+            
+            // Simulate API call (replace with actual system call)
+            setTimeout(() => {
+                responseContent.innerHTML = `
+<strong>Query:</strong> ${query}
+
+<strong>Response:</strong>
+This is a demonstration UI. In production, this query would be processed by the Financial Multi-Agent System:
+
+1. <strong>Market Data Agent</strong> would retrieve relevant market data
+2. <strong>Fundamental & News Agent</strong> would analyze financial statements and news
+3. <strong>Portfolio & Risk Agent</strong> would compute risk metrics
+4. <strong>Summarizer Agent</strong> would synthesize the final answer
+
+To run actual evaluations, use the evaluation runners:
+- <code>python evaluation/runners/run_all_evals.py</code>
+- <code>python evaluation/runners/run_hard_evals.py</code>
+- <code>python evaluation/runners/run_llm_evals.py</code>
+
+<strong>Separation of Concerns:</strong>
+- UI (this page): Real user inference queries
+- Evaluation: Test cases executed via CLI/CI runners
+                `;
+            }, 1500);
+        }
+        
+        // Allow Enter+Shift for new line, Enter alone to submit
+        document.getElementById('queryInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                submitQuery();
+            }
+        });
     </script>
 </body>
 </html>
