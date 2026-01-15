@@ -181,10 +181,22 @@
             background: #f8f9fa;
             border-radius: 12px;
             display: none;
+            animation: fadeIn 0.5s ease-in;
         }
         
         .response-section.active {
-            display: block;
+            display: block !important;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .response-section h3 {
@@ -194,11 +206,24 @@
         
         .response-content {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 8px;
             border-left: 4px solid #667eea;
-            white-space: pre-wrap;
-            line-height: 1.6;
+            line-height: 1.8;
+            color: #495057;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .response-content strong {
+            color: #667eea;
+        }
+        
+        .response-content code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
         }
         
         .loading {
@@ -325,32 +350,93 @@
             const responseSection = document.getElementById('responseSection');
             const responseContent = document.getElementById('responseContent');
             
+            // Make sure section is visible
             responseSection.classList.add('active');
-            responseContent.innerHTML = '<div class="loading">Processing your query... This is a demo UI. In production, this would call the multi-agent system.</div>';
+            responseSection.style.display = 'block';
+            
+            // Show loading state
+            responseContent.innerHTML = '<div class="loading">🔄 Processing your query...</div>';
+            
+            // Scroll to response
+            responseSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             
             // Simulate API call (replace with actual system call)
             setTimeout(() => {
-                responseContent.innerHTML = `
-<strong>Query:</strong> ${query}
-
-<strong>Response:</strong>
-This is a demonstration UI. In production, this query would be processed by the Financial Multi-Agent System:
-
-1. <strong>Market Data Agent</strong> would retrieve relevant market data
-2. <strong>Fundamental & News Agent</strong> would analyze financial statements and news
-3. <strong>Portfolio & Risk Agent</strong> would compute risk metrics
-4. <strong>Summarizer Agent</strong> would synthesize the final answer
-
-To run actual evaluations, use the evaluation runners:
-- <code>python evaluation/runners/run_all_evals.py</code>
-- <code>python evaluation/runners/run_hard_evals.py</code>
-- <code>python evaluation/runners/run_llm_evals.py</code>
-
-<strong>Separation of Concerns:</strong>
-- UI (this page): Real user inference queries
-- Evaluation: Test cases executed via CLI/CI runners
-                `;
+                const response = generateResponse(query);
+                responseContent.innerHTML = response;
+                
+                // Ensure it's visible
+                responseSection.style.display = 'block';
+                responseSection.classList.add('active');
             }, 1500);
+        }
+        
+        function generateResponse(query) {
+            // This is a demo response generator
+            // In production, this would call the actual multi-agent system
+            
+            const lowerQuery = query.toLowerCase();
+            let response = `<div style="line-height: 1.8;"><strong>📋 Your Query:</strong><br><em>"${query}"</em></div><br><hr style="margin: 20px 0; border: none; border-top: 1px solid #e9ecef;"><br>`;
+            
+            // Generate contextual response based on query type
+            if (lowerQuery.includes('invest') || lowerQuery.includes('buy') || lowerQuery.includes('sell')) {
+                response += `<div style="line-height: 1.8;">
+<strong>💡 Investment Analysis:</strong><br><br>
+Based on your query, the Financial Multi-Agent System would process this through:<br><br>
+1. <strong>📊 Market Data Agent</strong> - Retrieving current prices, returns, and market trends<br>
+2. <strong>📈 Fundamental & News Agent</strong> - Analyzing financial statements, earnings, and recent news<br>
+3. <strong>⚖️ Portfolio & Risk Agent</strong> - Computing risk metrics and portfolio implications<br>
+4. <strong>📝 Summarizer Agent</strong> - Synthesizing a comprehensive investment recommendation<br><br>
+<em>Note: This is a demo UI. In production, you would receive a detailed analysis with specific recommendations, risk assessments, and supporting evidence.</em>
+</div>`;
+            } else if (lowerQuery.includes('portfolio') || lowerQuery.includes('risk')) {
+                response += `<div style="line-height: 1.8;">
+<strong>⚖️ Portfolio & Risk Analysis:</strong><br><br>
+The system would analyze:<br><br>
+• Portfolio composition and weights<br>
+• Concentration risk and diversification metrics<br>
+• Volatility and Value-at-Risk (VaR) calculations<br>
+• Sector exposure and correlation analysis<br>
+• Stress testing scenarios<br><br>
+<em>Note: This is a demo UI. In production, you would receive detailed risk metrics, portfolio optimization suggestions, and scenario analyses.</em>
+</div>`;
+            } else if (lowerQuery.includes('compare') || lowerQuery.includes('performance')) {
+                response += `<div style="line-height: 1.8;">
+<strong>📊 Performance Comparison:</strong><br><br>
+The system would provide:<br><br>
+• Historical performance metrics for each asset<br>
+• Relative performance analysis<br>
+• Correlation and beta calculations<br>
+• Risk-adjusted returns (Sharpe ratio, etc.)<br>
+• Visualizations of performance over time<br><br>
+<em>Note: This is a demo UI. In production, you would receive detailed comparative analysis with charts and statistical metrics.</em>
+</div>`;
+            } else if (lowerQuery.includes('fundamental') || lowerQuery.includes('revenue') || lowerQuery.includes('margin') || lowerQuery.includes('debt')) {
+                response += `<div style="line-height: 1.8;">
+<strong>📈 Fundamental Analysis:</strong><br><br>
+The system would extract and analyze:<br><br>
+• Revenue growth trends and projections<br>
+• Profitability margins (gross, operating, net)<br>
+• Debt levels and financial health metrics<br>
+• Cash flow and liquidity ratios<br>
+• Key financial ratios and benchmarks<br><br>
+<em>Note: This is a demo UI. In production, you would receive detailed financial analysis with specific numbers, trends, and industry comparisons.</em>
+</div>`;
+            } else {
+                response += `<div style="line-height: 1.8;">
+<strong>🤖 System Response:</strong><br><br>
+Your query has been received. The Financial Multi-Agent System would process this through:<br><br>
+1. <strong>Market Data Agent</strong> - Market data retrieval<br>
+2. <strong>Fundamental & News Agent</strong> - Financial and news analysis<br>
+3. <strong>Portfolio & Risk Agent</strong> - Risk computation<br>
+4. <strong>Summarizer Agent</strong> - Final answer synthesis<br><br>
+<em>Note: This is a demo UI. In production, you would receive a comprehensive, evidence-based answer to your financial question.</em><br><br>
+<strong>To run actual evaluations:</strong><br>
+<code>python evaluation/runners/run_all_evals.py</code>
+</div>`;
+            }
+            
+            return response;
         }
         
         // Allow Enter+Shift for new line, Enter alone to submit
