@@ -318,6 +318,19 @@ class MasterEvalRunner:
                         report_lines.append(f"- {dim}: {score:.2f}/5.0\n")
                 report_lines.append("\n")
         
+        # System-level tests
+        report_lines.append("### System-Level Tests\n")
+        if system_report.get("test_types"):
+            for test_type, test_data in system_report["test_types"].items():
+                report_lines.append(f"#### {test_data['name']}\n")
+                report_lines.append(f"- **Total Tests:** {test_data['total_tests']}\n")
+                report_lines.append(f"- **Passed:** {test_data['passed']}\n")
+                report_lines.append(f"- **Failed:** {test_data['failed']}\n")
+                report_lines.append(f"- **Pass Rate:** {test_data['pass_rate']:.2%}\n")
+                report_lines.append(f"- **Threshold:** {test_data['threshold']:.2%}\n")
+                report_lines.append(f"- **Status:** {'✓ PASS' if test_data['meets_threshold'] else '✗ FAIL'}\n")
+                report_lines.append("\n")
+        
         # Failure patterns
         report_lines.append("## Failure Patterns\n")
         report_lines.append("### Common Issues\n")
@@ -400,6 +413,9 @@ class MasterEvalRunner:
                 all_pass = False
         for agent_name in human_report.get("agents", {}):
             if not human_report["agents"][agent_name]["meets_threshold"]:
+                all_pass = False
+        for test_type in system_report.get("test_types", {}):
+            if not system_report["test_types"][test_type]["meets_threshold"]:
                 all_pass = False
         
         if not all_pass:
