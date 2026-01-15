@@ -90,7 +90,19 @@ class GoogleLLMClient:
                 generation_config=generation_config
             )
             
-            return response.text
+            # Handle response safely
+            if response.candidates and len(response.candidates) > 0:
+                candidate = response.candidates[0]
+                if candidate.content and candidate.content.parts:
+                    return candidate.content.parts[0].text
+                elif candidate.finish_reason == 2:  # SAFETY - content filtered
+                    return "Response was filtered for safety reasons. Please rephrase your query."
+                elif candidate.finish_reason == 3:  # RECITATION - recitation detected
+                    return "Response blocked due to recitation detection. Please rephrase your query."
+                else:
+                    return f"Response generated but empty. Finish reason: {candidate.finish_reason}"
+            else:
+                return "No response generated. Please try again."
             
         except Exception as e:
             raise Exception(f"Google API error: {str(e)}")
