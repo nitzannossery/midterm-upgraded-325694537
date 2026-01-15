@@ -16,7 +16,7 @@ class Settings(BaseModel):
     require_sources: bool = os.getenv("REQUIRE_SOURCES", "true").lower() == "true"
     
     # API Keys
-    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
     google_api_key: str = os.getenv("GOOGLE_API_KEY", "")
+    google_model: str = os.getenv("GOOGLE_MODEL", "gemini-pro")  # Default to gemini-pro
 
 settings = Settings()

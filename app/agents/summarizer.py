@@ -1,18 +1,75 @@
 from typing import Dict, Any, List
 from app.agents.base import Agent
 from app.schemas import AgentOutput, Source
+from app.llm.google_client import GoogleLLMClient
 
 class SummarizerAgent(Agent):
     name = "Summarizer Agent"
+    
+    def __init__(self):
+        """Initialize summarizer with Google LLM client."""
+        try:
+            self.llm_client = GoogleLLMClient()
+            self.use_llm = True
+        except Exception as e:
+            print(f"Warning: Google API not available, using deterministic summary: {e}")
+            self.llm_client = None
+            self.use_llm = False
 
     def run(self, query: str, context: Dict[str, Any]) -> AgentOutput:
         sources: List[Source] = context.get("sources", [])
         agent_outputs = context.get("agent_outputs", [])
 
-        # Generate deterministic summary from agent outputs
-        content = self._generate_summary(query, agent_outputs, sources)
+        # Use LLM if available, otherwise use deterministic summary
+        if self.use_llm and self.llm_client:
+            content = self._generate_llm_summary(query, agent_outputs, sources)
+        else:
+            content = self._generate_summary(query, agent_outputs, sources)
 
         return AgentOutput(agent=self.name, content=content, sources=sources)
+    
+    def _generate_llm_summary(self, query: str, agent_outputs: List[AgentOutput], sources: List[Source]) -> str:
+        """Generate summary using Google Gemini LLM."""
+        system_prompt = """You are a financial analyst summarizing multi-agent analysis results.
+Provide a structured summary with:
+1. Investment Thesis (3 key points)
+2. Key Risks (3 main risks)
+3. Evidence & Sources (list sources used)
+4. Recommendation (actionable advice)
+
+Format the response clearly with sections."""
+        
+        # Build context from agent outputs
+        agent_context = []
+        for agent_out in agent_outputs:
+            agent_context.append(f"{agent_out.agent}:\n{agent_out.content}")
+        
+        sources_context = []
+        for source in sources:
+            sources_context.append(f"- {source.title}: {source.snippet or 'No snippet available'}")
+        
+        prompt = f"""Query: {query}
+
+Agent Analysis Results:
+{chr(10).join(agent_context)}
+
+Sources:
+{chr(10).join(sources_context) if sources_context else 'No sources retrieved'}
+
+Please provide a comprehensive financial analysis summary."""
+        
+        try:
+            summary = self.llm_client.generate(
+                prompt=prompt,
+                system_prompt=system_prompt,
+                temperature=0.3,  # Lower temperature for more focused analysis
+                max_tokens=1000
+            )
+            return summary
+        except Exception as e:
+            print(f"Error generating LLM summary: {e}")
+            # Fallback to deterministic summary
+            return self._generate_summary(query, agent_outputs, sources)
     
     def _generate_summary(self, query: str, agent_outputs: List[AgentOutput], sources: List[Source]) -> str:
         """Generate structured summary without LLM (deterministic)."""
