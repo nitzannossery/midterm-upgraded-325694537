@@ -27,6 +27,7 @@ try:
     from run_llm_evals import LLMEvalRunner
     from run_human_eval_merge import HumanEvalMerger
     from run_retrieval_evals import RetrievalEvalRunner
+    from run_system_tests import SystemTestRunner
 except ImportError:
     # Fallback: import directly
     import importlib.util
@@ -49,6 +50,11 @@ except ImportError:
     retrieval_evals_module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(retrieval_evals_module)
     RetrievalEvalRunner = retrieval_evals_module.RetrievalEvalRunner
+    
+    spec = importlib.util.spec_from_file_location("run_system_tests", current_dir / "run_system_tests.py")
+    system_tests_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(system_tests_module)
+    SystemTestRunner = system_tests_module.SystemTestRunner
 
 
 class MasterEvalRunner:
@@ -108,6 +114,23 @@ class MasterEvalRunner:
         
         return report
     
+    def run_system_tests(self) -> dict:
+        """Run system-level tests."""
+        print("\n" + "="*60)
+        print("RUNNING SYSTEM-LEVEL TESTS")
+        print("="*60)
+        
+        runner = SystemTestRunner(self.config_path)
+        results = runner.run_all_system_tests()
+        report = runner.generate_report(results)
+        
+        # Save report
+        report_file = self.output_dir / "system_tests_report.json"
+        with open(report_file, 'w') as f:
+            json.dump(report, f, indent=2)
+        
+        return report
+    
     def run_retrieval_evals(self, agent: str = None) -> dict:
         """Run retrieval evaluations."""
         print("\n" + "="*60)
@@ -152,7 +175,7 @@ class MasterEvalRunner:
         
         return report
     
-    def generate_markdown_report(self, hard_report: dict, retrieval_report: dict, llm_report: dict, human_report: dict) -> str:
+    def generate_markdown_report(self, hard_report: dict, retrieval_report: dict, llm_report: dict, human_report: dict, system_report: dict) -> str:
         """Generate comprehensive Markdown report."""
         template_path = Path(self.config["reporting"]["markdown_template"])
         
@@ -330,6 +353,13 @@ class MasterEvalRunner:
         except Exception as e:
             print(f"Warning: Could not run retrieval evaluations: {e}")
         
+        # Run system tests
+        system_report = {"test_types": {}}
+        try:
+            system_report = self.run_system_tests()
+        except Exception as e:
+            print(f"Warning: Could not run system tests: {e}")
+        
         # Run LLM evals
         llm_report = self.run_llm_evals(agent, llm_sample_size)
         
@@ -342,7 +372,7 @@ class MasterEvalRunner:
                 print(f"Warning: Could not process human evaluations: {e}")
         
         # Generate Markdown report
-        markdown_report = self.generate_markdown_report(hard_report, retrieval_report, llm_report, human_report)
+        markdown_report = self.generate_markdown_report(hard_report, retrieval_report, llm_report, human_report, system_report)
         report_file = self.output_dir / "evaluation_report.md"
         with open(report_file, 'w') as f:
             f.write(markdown_report)

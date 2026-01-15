@@ -16,9 +16,22 @@ agents:
     name: "Market Data Agent"
     description: "Retrieves prices, volume, returns, benchmarks, and FX data"
     hard_tests:
-      count: 25
-      file: "evaluation/hard/market_agent_tests.yaml"
+      count: 32  # 25 original + 7 additional
+      files:
+        - "evaluation/hard/market_agent_tests.yaml"
+        - "evaluation/hard/market_agent_additional_tests.yaml"
       pass_threshold: 0.90  # 90% must pass
+    retrieval_tests:
+      count: 15  # 12 original + 3 additional
+      files:
+        - "evaluation/datasets/fundamental_agent/retrieval_test_cases.jsonl"
+        - "evaluation/datasets/market_agent/additional_retrieval_tests.jsonl"
+      pass_threshold: 0.85
+      checks:
+        - document_retrieved
+        - ticker_explicitly_mentioned
+        - date_range_correct
+        - top_k_sources_relevant
     llm_tests:
       count: 15
       file: "evaluation/datasets/market_agent/llm_test_cases.jsonl"
@@ -49,8 +62,10 @@ agents:
       file: "evaluation/hard/fundamental_agent_tests.yaml"
       pass_threshold: 0.90
     retrieval_tests:
-      count: 12
-      file: "evaluation/datasets/fundamental_agent/retrieval_test_cases.jsonl"
+      count: 15  # 12 original + 3 additional
+      files:
+        - "evaluation/datasets/fundamental_agent/retrieval_test_cases.jsonl"
+        - "evaluation/datasets/fundamental_agent/additional_retrieval_tests.jsonl"
       pass_threshold: 0.85
       checks:
         - document_retrieved
@@ -58,9 +73,13 @@ agents:
         - citation_included
         - value_consistent_with_document
         - explicit_uncertainty_when_no_source
+        - claims_supported_by_document
+        - no_unsupported_data
     llm_tests:
-      count: 15
-      file: "evaluation/datasets/fundamental_agent/llm_test_cases.jsonl"
+      count: 20  # 15 original + 5 additional
+      files:
+        - "evaluation/datasets/fundamental_agent/llm_test_cases.jsonl"
+        - "evaluation/datasets/fundamental_agent/additional_llm_tests.jsonl"
       pass_threshold: 0.80
       dimensions:
         - correctness
@@ -84,12 +103,16 @@ agents:
     name: "Portfolio & Risk Agent"
     description: "Computes risk metrics and investment recommendations"
     hard_tests:
-      count: 25
-      file: "evaluation/hard/portfolio_agent_tests.yaml"
+      count: 31  # 25 original + 6 additional
+      files:
+        - "evaluation/hard/portfolio_agent_tests.yaml"
+        - "evaluation/hard/portfolio_agent_additional_tests.yaml"
       pass_threshold: 0.90
     llm_tests:
-      count: 15
-      file: "evaluation/datasets/portfolio_agent/llm_test_cases.jsonl"
+      count: 18  # 15 original + 3 additional
+      files:
+        - "evaluation/datasets/portfolio_agent/llm_test_cases.jsonl"
+        - "evaluation/datasets/portfolio_agent/additional_llm_tests.jsonl"
       pass_threshold: 0.80
       dimensions:
         - correctness
@@ -97,6 +120,8 @@ agents:
         - faithfulness
         - clarity
         - risk_awareness
+        - recommendation_consistency
+        - tradeoff_clarity
       min_score_per_dimension: 3.0
       pass_rule: "average_score >= 4.0 AND faithfulness >= 4.5"
     human_tests:
@@ -117,8 +142,10 @@ agents:
     hard_tests:
       enabled: false  # No hard ground-truth tests
     llm_tests:
-      count: 15
-      file: "evaluation/datasets/summarizer/llm_test_cases.jsonl"
+      count: 19  # 15 original + 4 additional
+      files:
+        - "evaluation/datasets/summarizer/llm_test_cases.jsonl"
+        - "evaluation/datasets/summarizer/additional_llm_tests.jsonl"
       pass_threshold: 0.80
       dimensions:
         - coherence
@@ -128,10 +155,14 @@ agents:
         - reflects_agent_outputs
         - no_new_facts
         - clear_decision_rationale
+        - no_contradictions
+        - data_grounded
       min_score_per_dimension: 3.0
     human_tests:
-      count: 7
-      file: "evaluation/datasets/summarizer/human_test_cases.csv"
+      count: 11  # 7 original + 4 additional
+      files:
+        - "evaluation/datasets/summarizer/human_test_cases.csv"
+        - "evaluation/datasets/summarizer/additional_human_tests.csv"
       rubric_file: "evaluation/human/summarizer_rubric.md"
       pass_threshold: 0.75
       dimensions:
@@ -142,6 +173,29 @@ agents:
         - free_text_feedback
       min_score_per_dimension: 3.0
       hitl_format: true  # Human-in-the-Loop format
+
+# System-level tests
+system_tests:
+  cross_agent:
+    name: "Cross-Agent / System-Level Tests"
+    description: "Tests orchestrator and system integration"
+    file: "evaluation/system/cross_agent_tests.yaml"
+    count: 4
+    pass_threshold: 0.90
+  
+  regression:
+    name: "Regression / CI Tests"
+    description: "Tests to ensure changes don't break existing functionality"
+    file: "evaluation/system/regression_tests.yaml"
+    count: 4
+    pass_threshold: 0.90
+  
+  edge_cases:
+    name: "Edge & Failure Cases"
+    description: "Tests for error handling and edge cases"
+    file: "evaluation/system/edge_cases_tests.yaml"
+    count: 4
+    pass_threshold: 0.90
 
 # LLM Evaluation Settings
 llm_eval:
