@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Settings(BaseModel):
     # "demo" shows capabilities; "live" runs inference pipeline
@@ -10,5 +14,8 @@ class Settings(BaseModel):
 
     # Safety: require citations/sources in live mode
     require_sources: bool = os.getenv("REQUIRE_SOURCES", "true").lower() == "true"
+    
+    # API Keys
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
 
 settings = Settings()
