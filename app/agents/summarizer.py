@@ -6,7 +6,7 @@ class SummarizerAgent(Agent):
     name = "Summarizer Agent"
 
     def run(self, query: str, context: Dict[str, Any]) -> AgentOutput:
-        sources: List[Source] = List[Source] = context.get("sources", [])
+        sources: List[Source] = context.get("sources", [])
         agent_outputs = context.get("agent_outputs", [])
 
         # Generate deterministic summary from agent outputs
