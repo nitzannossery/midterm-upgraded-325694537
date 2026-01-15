@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import time
 import subprocess
+import asyncio
 from typing import Dict
 from app.schemas import AnalyzeRequest, AnalyzeResponse
 from app.config import settings
@@ -81,7 +82,19 @@ async def analyze(req: AnalyzeRequest, request: Request):
 
         # Live inference with timeout protection
         try:
-            result = orch.run(req.query)
+            # Run orchestrator with timeout (25 seconds max)
+            # Use asyncio.to_thread to run sync code in async context
+            try:
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(orch.run, req.query),
+                    timeout=25.0
+                )
+            except asyncio.TimeoutError:
+                raise HTTPException(
+                    status_code=504,
+                    detail="Request timeout: Analysis took too long (>25s). Please try a simpler query."
+                )
+            
             elapsed_time = time.time() - start_time
             
             # Add timing to meta
@@ -89,6 +102,8 @@ async def analyze(req: AnalyzeRequest, request: Request):
             result.meta["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
             
             return result
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=500,
