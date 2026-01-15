@@ -2,6 +2,15 @@
 pyyaml>=6.0
 openai>=1.0.0
 
+# API Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# UI Framework (optional - for Streamlit)
+streamlit>=1.28.0
+
 # Data processing
 pandas>=2.0.0
 numpy>=1.24.0
