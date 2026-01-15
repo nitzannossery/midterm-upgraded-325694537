@@ -21,11 +21,17 @@ class GoogleLLMClient:
         model_name = settings.google_model
         
         # List of models to try (in order of preference)
+        # Note: Remove "models/" prefix if present
+        model_name_clean = model_name.replace("models/", "")
         models_to_try = [
-            model_name,  # Try user-specified model first
-            "gemini-1.5-flash",  # Fast and efficient
-            "gemini-1.5-pro",    # More capable
-            "gemini-pro",         # Legacy name
+            model_name_clean,     # Try user-specified model first
+            "gemini-2.5-flash",   # Latest fast model
+            "gemini-2.5-pro",     # Latest capable model
+            "gemini-2.0-flash",   # Alternative fast model
+            "gemini-flash-latest", # Latest flash (auto-updates)
+            "gemini-pro-latest",   # Latest pro (auto-updates)
+            "gemini-1.5-flash",   # Older version
+            "gemini-1.5-pro",     # Older version
         ]
         
         for model_to_try in models_to_try:
