@@ -1,5 +1,7 @@
 # Financial Analysis Multi-Agent System - Evaluation Framework
 
+**GitHub Repository**: [https://github.com/nitzannossery/midterm-upgraded-325694537](https://github.com/nitzannossery/midterm-upgraded-325694537)
+
 ## Overview
 
 This repository contains a production-grade evaluation framework for a multi-agent financial analysis system. The system consists of specialized agents coordinated by an orchestrator:
