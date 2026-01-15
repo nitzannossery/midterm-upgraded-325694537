@@ -1,0 +1,5 @@
+id,query,scenario,question_1_understandable,question_2_trust_decision,question_3_free_text,evaluator
+summarizer_human_008,"Summarize the analysis into: Thesis / Risks / Evidence / Recommendation for AAPL","You are a non-expert user reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_human_009,"Provide a Buy/Hold/Sell decision for MSFT with 3 evidence-based bullets","You are a non-expert user reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_human_010,"Is the summary understandable to a non-expert user for GOOGL?","You are a non-expert user reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_human_011,"Would you trust this recommendation for a real decision regarding TSLA?","You are a non-expert user reviewing this AI-generated investment recommendation.",,,,,,

@@ -1,0 +1,149 @@
+# Additional Hard Tests for Portfolio & Risk Agent
+# Based on comprehensive test suite requirements
+
+tests:
+  # Test: Portfolio analysis
+  - id: "portfolio_additional_001"
+    name: "Analyze portfolio concentration risk and sector exposure"
+    input:
+      query: "Analyze portfolio 50% AAPL, 30% MSFT, 20% GOOGL: concentration risk and sector exposure"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.3
+        - symbol: "GOOGL"
+          weight: 0.2
+      analysis_type: "concentration_and_sector"
+    expected_output:
+      type: "portfolio_analysis"
+      concentration_risk:
+        type: "float"
+        min: 0.0
+        max: 1.0
+      sector_exposure:
+        type: "dict"
+      status: "success"
+    validation:
+      required_fields: ["concentration_risk", "sector_exposure", "status"]
+      weights_sum_to_one: true
+
+  # Test: Portfolio volatility
+  - id: "portfolio_additional_002"
+    name: "Compute portfolio volatility given historical returns"
+    input:
+      query: "Compute portfolio volatility for 40% AAPL, 60% MSFT given historical returns"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.4
+        - symbol: "MSFT"
+          weight: 0.6
+      metric: "volatility"
+      use_historical: true
+    expected_output:
+      type: "portfolio_metric"
+      metric: "volatility"
+      value:
+        type: "float"
+        min: 0.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      weights_sum_to_one: true
+
+  # Test: VaR calculation
+  - id: "portfolio_additional_003"
+    name: "Estimate VaR for portfolio"
+    input:
+      query: "Estimate VaR for portfolio 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "var"
+      confidence_level: 0.95
+    expected_output:
+      type: "portfolio_metric"
+      metric: "var"
+      value:
+        type: "float"
+        max: 0.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      weights_sum_to_one: true
+
+  # Test: Expected drawdown
+  - id: "portfolio_additional_004"
+    name: "Estimate expected drawdown for portfolio"
+    input:
+      query: "Estimate expected drawdown for portfolio 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "expected_drawdown"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "expected_drawdown"
+      value:
+        type: "float"
+        min: -1.0
+        max: 0.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      weights_sum_to_one: true
+
+  # Test: Stress test
+  - id: "portfolio_additional_005"
+    name: "Stress test: ticker drops 15%"
+    input:
+      query: "Stress test: what happens if AAPL drops 15% for portfolio 60% AAPL, 40% MSFT?"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.6
+        - symbol: "MSFT"
+          weight: 0.4
+      scenario:
+        type: "single_stock_drop"
+        symbol: "AAPL"
+        drop_percentage: -0.15
+    expected_output:
+      type: "stress_test_result"
+      scenario: "single_stock_drop"
+      portfolio_impact:
+        type: "float"
+        max: 0.0
+      status: "success"
+    validation:
+      required_fields: ["scenario", "portfolio_impact", "status"]
+      weights_sum_to_one: true
+
+  # Test: Rebalancing recommendation
+  - id: "portfolio_additional_006"
+    name: "Recommend rebalance to reduce volatility"
+    input:
+      query: "Recommend a rebalance for portfolio 50% AAPL, 50% MSFT to reduce volatility by 20%"
+      current_portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      objective: "reduce_volatility"
+      target_reduction: 0.20
+    expected_output:
+      type: "rebalancing_recommendation"
+      recommended_portfolio:
+        type: "dict"
+      volatility_reduction:
+        type: "float"
+        min: 0.15
+        max: 0.25
+      status: "success"
+    validation:
+      required_fields: ["recommended_portfolio", "volatility_reduction", "status"]
+      new_weights_sum_to_one: true

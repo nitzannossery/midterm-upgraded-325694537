@@ -1,0 +1,4 @@
+{"id": "summarizer_llm_016", "query": "Summarize the analysis into: Thesis / Risks / Evidence / Recommendation for AAPL", "expected_output_type": "structured_summary", "context": "LLM eval - structured summary format"}
+{"id": "summarizer_llm_017", "query": "Provide a Buy/Hold/Sell decision for MSFT with 3 evidence-based bullets", "expected_output_type": "decision_with_evidence", "context": "LLM eval - evidence-based decision"}
+{"id": "summarizer_llm_018", "query": "Does the summary contradict any agent output for GOOGL analysis?", "expected_output_type": "consistency_check", "context": "LLM eval - no contradictions"}
+{"id": "summarizer_llm_019", "query": "Is the recommendation for TSLA grounded only in retrieved data?", "expected_output_type": "grounded_recommendation", "context": "LLM eval - data grounding check"}

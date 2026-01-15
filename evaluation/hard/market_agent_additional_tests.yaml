@@ -1,0 +1,150 @@
+# Additional Hard Tests for Market Data Agent
+# Based on comprehensive test suite requirements
+
+tests:
+  # Test: 30/90/365-day returns
+  - id: "market_additional_001"
+    name: "Calculate 30-day return"
+    input:
+      query: "What was the 30-day return of AAPL?"
+      symbol: "AAPL"
+      period_days: 30
+      metric: "return"
+    expected_output:
+      type: "return_data"
+      symbol: "AAPL"
+      period_days: 30
+      return:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period_days", "return", "status"]
+      return_reasonable: true
+
+  - id: "market_additional_002"
+    name: "Calculate 90-day return"
+    input:
+      query: "What was the 90-day return of MSFT?"
+      symbol: "MSFT"
+      period_days: 90
+      metric: "return"
+    expected_output:
+      type: "return_data"
+      symbol: "MSFT"
+      period_days: 90
+      return:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period_days", "return", "status"]
+
+  - id: "market_additional_003"
+    name: "Calculate 365-day return"
+    input:
+      query: "What was the 365-day return of GOOGL?"
+      symbol: "GOOGL"
+      period_days: 365
+      metric: "return"
+    expected_output:
+      type: "return_data"
+      symbol: "GOOGL"
+      period_days: 365
+      return:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period_days", "return", "status"]
+
+  # Test: Maximum drawdown
+  - id: "market_additional_004"
+    name: "Calculate maximum drawdown in last year"
+    input:
+      query: "What is the maximum drawdown of TSLA in the last year?"
+      symbol: "TSLA"
+      period: "1y"
+      metric: "max_drawdown"
+    expected_output:
+      type: "drawdown_data"
+      symbol: "TSLA"
+      period: "1y"
+      max_drawdown:
+        type: "float"
+        min: -1.0
+        max: 0.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "max_drawdown", "status"]
+      drawdown_non_positive: true
+
+  # Test: 30-day volatility
+  - id: "market_additional_005"
+    name: "Calculate 30-day volatility"
+    input:
+      query: "What is the 30-day volatility of NVDA?"
+      symbol: "NVDA"
+      period_days: 30
+      metric: "volatility"
+    expected_output:
+      type: "volatility_data"
+      symbol: "NVDA"
+      period_days: 30
+      volatility:
+        type: "float"
+        min: 0.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period_days", "volatility", "status"]
+      volatility_positive: true
+
+  # Test: Beta calculation
+  - id: "market_additional_006"
+    name: "Calculate beta relative to benchmark"
+    input:
+      query: "What is the beta of AAPL relative to SPY?"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      metric: "beta"
+    expected_output:
+      type: "beta_data"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      beta:
+        type: "float"
+        min: -5.0
+        max: 5.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "benchmark", "beta", "status"]
+      beta_finite: true
+
+  # Test: Performance comparison
+  - id: "market_additional_007"
+    name: "Compare performance vs benchmark over 6 months"
+    input:
+      query: "Compare AAPL performance vs SPY over 6 months"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      period: "6m"
+      metric: "performance_comparison"
+    expected_output:
+      type: "comparison_data"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      period: "6m"
+      relative_performance:
+        type: "float"
+      correlation:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "benchmark", "period", "relative_performance", "correlation", "status"]
+      correlation_valid: true

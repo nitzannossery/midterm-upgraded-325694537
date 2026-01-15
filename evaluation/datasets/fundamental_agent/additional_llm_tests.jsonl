@@ -1,0 +1,5 @@
+{"id": "fundamental_llm_016", "query": "Summarize revenue growth, margins, debt, and FCF for AAPL", "expected_output_type": "comprehensive_fundamental_summary", "context": "LLM eval - comprehensive fundamental summary"}
+{"id": "fundamental_llm_017", "query": "What are the top 3 financial risks mentioned in recent filings for MSFT?", "expected_output_type": "risk_analysis", "context": "LLM eval - risk identification from filings"}
+{"id": "fundamental_llm_018", "query": "Identify recent news that may materially impact the stock price of GOOGL", "expected_output_type": "material_news_impact", "context": "LLM eval - material news identification"}
+{"id": "fundamental_llm_019", "query": "Are there changes in forward guidance for AAPL? Quote the source", "expected_output_type": "guidance_analysis_with_source", "context": "LLM eval - forward guidance with source citation"}
+{"id": "fundamental_llm_020", "query": "List upcoming catalysts within the next 6 months for TSLA", "expected_output_type": "catalyst_timeline", "context": "LLM eval - upcoming catalysts identification"}

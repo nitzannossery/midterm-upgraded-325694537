@@ -1,0 +1,74 @@
+# Edge & Failure Cases Tests
+# Tests for error handling and edge cases
+
+tests:
+  # Test: Invalid ticker
+  - id: "edge_001"
+    name: "Handle query with invalid ticker"
+    input:
+      query: "Get price data for INVALID_TICKER_XYZ123"
+      symbol: "INVALID_TICKER_XYZ123"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_symbol"
+      message_contains: ["invalid", "not found", "symbol"]
+      no_hallucination: true
+    validation:
+      required_fields: ["status", "error_type", "message_contains", "no_hallucination"]
+      status_is_error: true
+      no_fake_data: true
+
+  # Test: Conflicting news sources
+  - id: "edge_002"
+    name: "Handle conflicting news sources"
+    input:
+      query: "Analyze news sentiment for AAPL with conflicting sources"
+      symbol: "AAPL"
+      scenario: "conflicting_sources"
+    expected_output:
+      type: "sentiment_analysis"
+      symbol: "AAPL"
+      conflicting_sources_acknowledged: true
+      uncertainty_explicitly_stated: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "conflicting_sources_acknowledged", "uncertainty_explicitly_stated", "status"]
+      conflict_handled: true
+
+  # Test: Highly volatile stock with sparse fundamentals
+  - id: "edge_003"
+    name: "Handle highly volatile stock with sparse fundamentals"
+    input:
+      query: "Analyze investment opportunity for highly volatile stock with limited fundamental data"
+      symbol: "VOLATILE_STOCK"
+      scenario: "sparse_fundamentals"
+    expected_output:
+      type: "analysis_with_limitations"
+      limitations_explicitly_stated: true
+      data_quality_mentioned: true
+      status: "success_or_warning"
+    validation:
+      required_fields: ["limitations_explicitly_stated", "data_quality_mentioned", "status"]
+      limitations_clear: true
+
+  # Test: Extreme concentration portfolio
+  - id: "edge_004"
+    name: "Handle portfolio with extreme concentration (80% single asset)"
+    input:
+      query: "Analyze portfolio 80% AAPL, 20% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.8
+        - symbol: "MSFT"
+          weight: 0.2
+      scenario: "extreme_concentration"
+    expected_output:
+      type: "portfolio_analysis"
+      concentration_warning: true
+      risk_highlighted: true
+      status: "success"
+    validation:
+      required_fields: ["concentration_warning", "risk_highlighted", "status"]
+      extreme_concentration_warned: true
+      weights_sum_to_one: true

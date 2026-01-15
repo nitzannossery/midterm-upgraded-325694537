@@ -1,0 +1,86 @@
+# Regression / CI Tests
+# Tests to ensure changes don't break existing functionality
+
+tests:
+  # Test: Prompt change preservation
+  - id: "regression_001"
+    name: "Prompt change preserves previous correct outputs"
+    input:
+      query: "Get closing price of AAPL on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      baseline_output: "reference_output_hash"
+    expected_output:
+      type: "price_data"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      output_consistent_with_baseline: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "date", "output_consistent_with_baseline", "status"]
+      regression_check: true
+
+  # Test: Top-K retrieval quality
+  - id: "regression_002"
+    name: "Changing Top-K retrieval doesn't degrade answer quality"
+    input:
+      query: "Get fundamental analysis for MSFT"
+      symbol: "MSFT"
+      top_k_values: [5, 10, 20]
+    expected_output:
+      type: "quality_comparison"
+      quality_scores:
+        type: "dict"
+      no_significant_degradation: true
+      status: "success"
+    validation:
+      required_fields: ["quality_scores", "no_significant_degradation", "status"]
+      quality_maintained: true
+
+  # Test: Stability across runs
+  - id: "regression_003"
+    name: "Results stable across repeated runs"
+    input:
+      query: "Calculate portfolio volatility for 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      runs: 3
+    expected_output:
+      type: "stability_test"
+      results:
+        type: "array"
+        length: 3
+      variance:
+        type: "float"
+        max: 0.001
+      status: "success"
+    validation:
+      required_fields: ["results", "variance", "status"]
+      variance_within_threshold: true
+
+  # Test: Eval scores within thresholds
+  - id: "regression_004"
+    name: "Eval scores remain within accepted thresholds"
+    input:
+      query: "Get comprehensive analysis for GOOGL"
+      symbol: "GOOGL"
+      check_all_eval_types: true
+    expected_output:
+      type: "eval_scores_check"
+      hard_eval_score:
+        type: "float"
+        min: 0.90
+      llm_eval_score:
+        type: "float"
+        min: 0.80
+      human_eval_score:
+        type: "float"
+        min: 0.75
+      all_thresholds_met: true
+      status: "success"
+    validation:
+      required_fields: ["hard_eval_score", "llm_eval_score", "human_eval_score", "all_thresholds_met", "status"]
+      thresholds_met: true

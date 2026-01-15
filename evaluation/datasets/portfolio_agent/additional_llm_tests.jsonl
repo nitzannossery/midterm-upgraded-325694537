@@ -1,0 +1,3 @@
+{"id": "portfolio_llm_016", "query": "Analyze portfolio 50% AAPL, 30% MSFT, 20% GOOGL: concentration risk and sector exposure", "expected_output_type": "portfolio_analysis_with_consistency", "context": "LLM eval - consistency check"}
+{"id": "portfolio_llm_017", "query": "Compute portfolio volatility for 40% AAPL, 60% MSFT and explain if recommendations are consistent with calculated risk metrics", "expected_output_type": "volatility_with_consistency", "context": "LLM eval - recommendation consistency"}
+{"id": "portfolio_llm_018", "query": "Estimate VaR for portfolio 50% AAPL, 50% MSFT and explain trade-offs clearly", "expected_output_type": "var_with_tradeoffs", "context": "LLM eval - clear trade-off explanation"}

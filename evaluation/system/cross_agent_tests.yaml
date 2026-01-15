@@ -1,0 +1,67 @@
+# Cross-Agent / System-Level Tests
+# Tests that verify orchestrator and system integration
+
+tests:
+  # Test: Orchestrator calls all relevant agents
+  - id: "system_001"
+    name: "Orchestrator calls all relevant agents for comprehensive query"
+    input:
+      query: "Should I invest in AAPL? Consider market data, fundamentals, and risk"
+      expected_agents: ["market_data", "fundamental_news", "portfolio_risk", "summarizer"]
+    expected_output:
+      type: "orchestrated_response"
+      agents_called:
+        type: "array"
+        required_values: ["market_data", "fundamental_news", "portfolio_risk", "summarizer"]
+      all_agents_called: true
+      status: "success"
+    validation:
+      required_fields: ["agents_called", "all_agents_called", "status"]
+      all_expected_agents_present: true
+
+  # Test: Agent outputs passed to Summarizer
+  - id: "system_002"
+    name: "Agent outputs passed correctly to Summarizer"
+    input:
+      query: "Analyze AAPL investment opportunity"
+      check_data_flow: true
+    expected_output:
+      type: "system_response"
+      summarizer_received_inputs:
+        type: "dict"
+        required_keys: ["market_data", "fundamental_news", "portfolio_risk"]
+      data_flow_correct: true
+      status: "success"
+    validation:
+      required_fields: ["summarizer_received_inputs", "data_flow_correct", "status"]
+      all_agent_outputs_present: true
+
+  # Test: Missing data handling
+  - id: "system_003"
+    name: "System handles missing data gracefully"
+    input:
+      query: "Get price data for INVALID_TICKER_XYZ"
+      symbol: "INVALID_TICKER_XYZ"
+    expected_output:
+      type: "error_or_partial"
+      status: "error_or_partial"
+      error_handled_gracefully: true
+      user_informed: true
+    validation:
+      required_fields: ["status", "error_handled_gracefully", "user_informed"]
+      graceful_error_handling: true
+
+  # Test: Explicit insufficient data message
+  - id: "system_004"
+    name: "System explicitly says insufficient data when needed"
+    input:
+      query: "Get financial data for non-existent company XYZ"
+      symbol: "XYZ"
+    expected_output:
+      type: "error"
+      status: "error"
+      message_contains: ["insufficient", "data", "not found", "unavailable"]
+      explicit_uncertainty: true
+    validation:
+      required_fields: ["status", "message_contains", "explicit_uncertainty"]
+      uncertainty_explicitly_stated: true
