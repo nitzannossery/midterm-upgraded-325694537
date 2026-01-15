@@ -1,0 +1,533 @@
+# Hard Evaluation Tests for Market Data Agent
+# Deterministic tests with exact or tolerance-based expected outputs
+
+tests:
+  # Test 1: Basic price retrieval
+  - id: "market_001"
+    name: "Retrieve single stock price"
+    input:
+      query: "Get the closing price of AAPL on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+    expected_output:
+      type: "price_data"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      close_price:
+        type: "float"
+        value: null  # Will be filled with actual expected value
+        tolerance: 0.01
+      status: "success"
+    validation:
+      required_fields: ["symbol", "date", "close_price", "status"]
+      data_quality: ["no_missing_values", "valid_date_format"]
+
+  # Test 2: Multiple symbols price retrieval
+  - id: "market_002"
+    name: "Retrieve prices for multiple symbols"
+    input:
+      query: "Get closing prices for AAPL, MSFT, GOOGL on 2024-01-15"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      date: "2024-01-15"
+    expected_output:
+      type: "price_data_multiple"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      date: "2024-01-15"
+      prices:
+        type: "dict"
+        count: 3
+      status: "success"
+    validation:
+      required_fields: ["symbols", "date", "prices", "status"]
+      all_symbols_present: true
+
+  # Test 3: Time series retrieval
+  - id: "market_003"
+    name: "Retrieve time series for date range"
+    input:
+      query: "Get daily prices for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      frequency: "daily"
+    expected_output:
+      type: "time_series"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      data_points:
+        type: "int"
+        min: 20  # At least 20 trading days
+        max: 22
+      status: "success"
+    validation:
+      required_fields: ["symbol", "start_date", "end_date", "data_points", "status"]
+      no_gaps: true
+      sorted_by_date: true
+
+  # Test 4: Returns calculation
+  - id: "market_004"
+    name: "Calculate daily returns"
+    input:
+      query: "Calculate daily returns for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      metric: "returns"
+    expected_output:
+      type: "returns_data"
+      symbol: "AAPL"
+      returns:
+        type: "array"
+        min_length: 20
+      mean_return:
+        type: "float"
+        tolerance: 0.0001
+      status: "success"
+    validation:
+      required_fields: ["symbol", "returns", "mean_return", "status"]
+      returns_between: [-1.0, 1.0]  # Returns should be reasonable
+
+  # Test 5: Volume data
+  - id: "market_005"
+    name: "Retrieve trading volume"
+    input:
+      query: "Get trading volume for TSLA on 2024-01-15"
+      symbol: "TSLA"
+      date: "2024-01-15"
+    expected_output:
+      type: "volume_data"
+      symbol: "TSLA"
+      date: "2024-01-15"
+      volume:
+        type: "int"
+        min: 1000000  # At least 1M shares for TSLA
+      status: "success"
+    validation:
+      required_fields: ["symbol", "date", "volume", "status"]
+      volume_positive: true
+
+  # Test 6: Benchmark comparison
+  - id: "market_006"
+    name: "Compare stock to benchmark (S&P 500)"
+    input:
+      query: "Compare AAPL returns to S&P 500 from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+    expected_output:
+      type: "benchmark_comparison"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      correlation:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      relative_performance:
+        type: "float"
+        tolerance: 0.01
+      status: "success"
+    validation:
+      required_fields: ["symbol", "benchmark", "correlation", "relative_performance", "status"]
+      correlation_valid: true
+
+  # Test 7: FX rate retrieval
+  - id: "market_007"
+    name: "Retrieve FX exchange rate"
+    input:
+      query: "Get USD/EUR exchange rate on 2024-01-15"
+      currency_pair: "USD/EUR"
+      date: "2024-01-15"
+    expected_output:
+      type: "fx_data"
+      currency_pair: "USD/EUR"
+      date: "2024-01-15"
+      rate:
+        type: "float"
+        min: 0.8
+        max: 1.2
+      status: "success"
+    validation:
+      required_fields: ["currency_pair", "date", "rate", "status"]
+      rate_positive: true
+
+  # Test 8: Data normalization (frequency)
+  - id: "market_008"
+    name: "Normalize daily to weekly frequency"
+    input:
+      query: "Convert AAPL daily prices to weekly from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      source_frequency: "daily"
+      target_frequency: "weekly"
+    expected_output:
+      type: "normalized_data"
+      symbol: "AAPL"
+      frequency: "weekly"
+      data_points:
+        type: "int"
+        min: 4
+        max: 5
+      status: "success"
+    validation:
+      required_fields: ["symbol", "frequency", "data_points", "status"]
+      frequency_correct: "weekly"
+
+  # Test 9: Missing data handling
+  - id: "market_009"
+    name: "Handle missing data with forward fill"
+    input:
+      query: "Get AAPL prices from 2024-01-01 to 2024-01-31, fill missing values"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      fill_method: "forward"
+    expected_output:
+      type: "time_series"
+      symbol: "AAPL"
+      missing_values_filled: true
+      fill_method: "forward"
+      no_nulls: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "missing_values_filled", "fill_method", "status"]
+      no_null_values: true
+
+  # Test 10: Invalid symbol handling
+  - id: "market_010"
+    name: "Handle invalid symbol gracefully"
+    input:
+      query: "Get price for INVALID_SYMBOL_XYZ on 2024-01-15"
+      symbol: "INVALID_SYMBOL_XYZ"
+      date: "2024-01-15"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_symbol"
+      message_contains: ["symbol", "not found", "invalid"]
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+
+  # Test 11: Date range validation
+  - id: "market_011"
+    name: "Validate date range (start < end)"
+    input:
+      query: "Get prices from 2024-01-31 to 2024-01-01"
+      symbol: "AAPL"
+      start_date: "2024-01-31"
+      end_date: "2024-01-01"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_date_range"
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+
+  # Test 12: Historical data limit
+  - id: "market_012"
+    name: "Retrieve data beyond available history"
+    input:
+      query: "Get AAPL prices from 1900-01-01 to 1900-01-31"
+      symbol: "AAPL"
+      start_date: "1900-01-01"
+      end_date: "1900-01-31"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "data_not_available"
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+
+  # Test 13: Intraday data (if available)
+  - id: "market_013"
+    name: "Retrieve intraday data"
+    input:
+      query: "Get 1-hour AAPL prices on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      frequency: "1h"
+    expected_output:
+      type: "intraday_data"
+      symbol: "AAPL"
+      frequency: "1h"
+      data_points:
+        type: "int"
+        min: 6  # At least 6 hours of trading
+        max: 8
+      status: "success"
+    validation:
+      required_fields: ["symbol", "frequency", "data_points", "status"]
+      frequency_correct: "1h"
+
+  # Test 14: Adjusted prices
+  - id: "market_014"
+    name: "Retrieve adjusted close prices"
+    input:
+      query: "Get adjusted close price for AAPL on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      price_type: "adjusted_close"
+    expected_output:
+      type: "price_data"
+      symbol: "AAPL"
+      price_type: "adjusted_close"
+      adjusted_close:
+        type: "float"
+        tolerance: 0.01
+      status: "success"
+    validation:
+      required_fields: ["symbol", "price_type", "adjusted_close", "status"]
+      price_positive: true
+
+  # Test 15: Multiple metrics at once
+  - id: "market_015"
+    name: "Retrieve OHLCV data"
+    input:
+      query: "Get OHLCV for AAPL on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      metrics: ["open", "high", "low", "close", "volume"]
+    expected_output:
+      type: "ohlcv_data"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      open:
+        type: "float"
+        tolerance: 0.01
+      high:
+        type: "float"
+        tolerance: 0.01
+      low:
+        type: "float"
+        tolerance: 0.01
+      close:
+        type: "float"
+        tolerance: 0.01
+      volume:
+        type: "int"
+        min: 1000000
+      status: "success"
+    validation:
+      required_fields: ["symbol", "date", "open", "high", "low", "close", "volume", "status"]
+      high_gte_low: true
+      high_gte_close: true
+      low_lte_close: true
+
+  # Test 16: Cumulative returns
+  - id: "market_016"
+    name: "Calculate cumulative returns"
+    input:
+      query: "Calculate cumulative returns for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      metric: "cumulative_returns"
+    expected_output:
+      type: "cumulative_returns"
+      symbol: "AAPL"
+      cumulative_return:
+        type: "float"
+        tolerance: 0.01
+      final_value:
+        type: "float"
+        min: 0.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "cumulative_return", "final_value", "status"]
+      final_value_positive: true
+
+  # Test 17: Volatility calculation
+  - id: "market_017"
+    name: "Calculate annualized volatility"
+    input:
+      query: "Calculate annualized volatility for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      metric: "volatility"
+      annualized: true
+    expected_output:
+      type: "volatility_data"
+      symbol: "AAPL"
+      volatility:
+        type: "float"
+        min: 0.0
+        max: 1.0  # 100% max reasonable volatility
+      annualized: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "volatility", "annualized", "status"]
+      volatility_positive: true
+
+  # Test 18: Beta calculation
+  - id: "market_018"
+    name: "Calculate beta against market"
+    input:
+      query: "Calculate beta of AAPL against SPY from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      metric: "beta"
+    expected_output:
+      type: "beta_data"
+      symbol: "AAPL"
+      benchmark: "SPY"
+      beta:
+        type: "float"
+        min: -5.0
+        max: 5.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "benchmark", "beta", "status"]
+      beta_finite: true
+
+  # Test 19: Data alignment (time ranges)
+  - id: "market_019"
+    name: "Align multiple symbols to common time range"
+    input:
+      query: "Align prices for AAPL, MSFT, GOOGL to common dates from 2024-01-01 to 2024-01-31"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      align: true
+    expected_output:
+      type: "aligned_data"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      aligned_dates:
+        type: "array"
+        min_length: 20
+      all_symbols_same_dates: true
+      status: "success"
+    validation:
+      required_fields: ["symbols", "aligned_dates", "all_symbols_same_dates", "status"]
+      dates_aligned: true
+
+  # Test 20: Weekend/holiday handling
+  - id: "market_020"
+    name: "Handle non-trading days correctly"
+    input:
+      query: "Get AAPL price on 2024-01-14 (Sunday)"
+      symbol: "AAPL"
+      date: "2024-01-14"
+    expected_output:
+      type: "error_or_previous"
+      status: "success_or_error"
+      # Either error or return previous trading day
+      valid_response: true
+    validation:
+      required_fields: ["status"]
+      either_error_or_data: true
+
+  # Test 21: Real-time vs historical
+  - id: "market_021"
+    name: "Distinguish real-time vs historical data"
+    input:
+      query: "Get latest price for AAPL"
+      symbol: "AAPL"
+      data_type: "realtime"
+    expected_output:
+      type: "realtime_data"
+      symbol: "AAPL"
+      timestamp:
+        type: "datetime"
+        recent: true  # Within last hour
+      price:
+        type: "float"
+        tolerance: 0.01
+      status: "success"
+    validation:
+      required_fields: ["symbol", "timestamp", "price", "status"]
+      timestamp_recent: true
+
+  # Test 22: Currency conversion
+  - id: "market_022"
+    name: "Convert price to different currency"
+    input:
+      query: "Get AAPL price in EUR on 2024-01-15"
+      symbol: "AAPL"
+      date: "2024-01-15"
+      target_currency: "EUR"
+    expected_output:
+      type: "converted_price"
+      symbol: "AAPL"
+      original_currency: "USD"
+      target_currency: "EUR"
+      converted_price:
+        type: "float"
+        tolerance: 0.01
+      exchange_rate:
+        type: "float"
+        min: 0.8
+        max: 1.2
+      status: "success"
+    validation:
+      required_fields: ["symbol", "original_currency", "target_currency", "converted_price", "exchange_rate", "status"]
+      exchange_rate_positive: true
+
+  # Test 23: Sector index data
+  - id: "market_023"
+    name: "Retrieve sector index data"
+    input:
+      query: "Get technology sector index (XLK) price on 2024-01-15"
+      symbol: "XLK"
+      date: "2024-01-15"
+      index_type: "sector"
+    expected_output:
+      type: "index_data"
+      symbol: "XLK"
+      index_type: "sector"
+      price:
+        type: "float"
+        tolerance: 0.01
+      status: "success"
+    validation:
+      required_fields: ["symbol", "index_type", "price", "status"]
+      price_positive: true
+
+  # Test 24: Data completeness check
+  - id: "market_024"
+    name: "Verify data completeness for time series"
+    input:
+      query: "Check data completeness for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      check_completeness: true
+    expected_output:
+      type: "completeness_report"
+      symbol: "AAPL"
+      total_expected_days: 31
+      trading_days_found:
+        type: "int"
+        min: 20
+      completeness_percentage:
+        type: "float"
+        min: 0.6  # At least 60% of trading days
+      status: "success"
+    validation:
+      required_fields: ["symbol", "total_expected_days", "trading_days_found", "completeness_percentage", "status"]
+      completeness_reasonable: true
+
+  # Test 25: Data format consistency
+  - id: "market_025"
+    name: "Ensure consistent data format across queries"
+    input:
+      query: "Get prices for AAPL, MSFT, GOOGL on 2024-01-15"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      date: "2024-01-15"
+      check_format_consistency: true
+    expected_output:
+      type: "price_data_multiple"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      format_consistent: true
+      all_prices_same_structure: true
+      status: "success"
+    validation:
+      required_fields: ["symbols", "format_consistent", "all_prices_same_structure", "status"]
+      format_consistent: true

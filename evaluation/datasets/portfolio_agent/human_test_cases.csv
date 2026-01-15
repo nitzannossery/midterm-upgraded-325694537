@@ -1,0 +1,8 @@
+id,query,expected_output_type,context
+portfolio_human_001,"Calculate portfolio volatility for 50% AAPL, 50% MSFT and explain the risk level","portfolio_volatility_with_risk_explanation","Portfolio risk assessment"
+portfolio_human_002,"Optimize portfolio of AAPL, MSFT, GOOGL to minimize risk and explain the optimal allocation","optimized_portfolio_with_explanation","Portfolio optimization"
+portfolio_human_003,"Calculate 95% VaR for portfolio 40% AAPL, 60% MSFT and explain what it means for risk management","var_with_risk_management_insights","Value at Risk analysis"
+portfolio_human_004,"Calculate Sharpe ratio for portfolio 50% AAPL, 50% GOOGL and assess risk-adjusted performance","sharpe_ratio_with_performance_assessment","Risk-adjusted return analysis"
+portfolio_human_005,"Run stress test: market crash -20% for portfolio 60% AAPL, 40% MSFT and explain the impact","stress_test_with_impact_analysis","Stress testing and scenario analysis"
+portfolio_human_006,"Calculate maximum drawdown for portfolio 100% TSLA and explain the risk implications","drawdown_analysis_with_risk_implications","Drawdown risk analysis"
+portfolio_human_007,"Check if portfolio 30% AAPL, 70% BND matches conservative risk profile and explain","risk_profile_match_with_explanation","Risk profile matching"

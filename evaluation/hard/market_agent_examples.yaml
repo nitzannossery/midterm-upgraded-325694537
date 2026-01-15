@@ -1,0 +1,66 @@
+# Example Hard Evaluation Tests - Market Data Agent
+# These examples match the specific format requested with exact expected values and tolerances
+
+examples:
+  # Example 1: Daily return calculation
+  - id: "market_example_001"
+    name: "Calculate daily return with exact tolerance"
+    input:
+      query: "What is the daily return of AAPL between 2024-01-02 and 2024-01-03?"
+      symbol: "AAPL"
+      start_date: "2024-01-02"
+      end_date: "2024-01-03"
+      metric: "daily_return"
+    expected_output:
+      type: "return_data"
+      symbol: "AAPL"
+      daily_return:
+        type: "float"
+        value: 0.0123  # Exact expected value
+        tolerance: 0.0001  # ±0.0001 tolerance
+      status: "success"
+    validation:
+      required_fields: ["symbol", "daily_return", "status"]
+      tolerance_check: true
+
+  # Example 2: FX rate retrieval
+  - id: "market_example_002"
+    name: "Fetch FX rate with tolerance"
+    input:
+      query: "Fetch USD/EUR exchange rate on 2024-02-01"
+      currency_pair: "USD/EUR"
+      date: "2024-02-01"
+    expected_output:
+      type: "fx_data"
+      currency_pair: "USD/EUR"
+      date: "2024-02-01"
+      rate:
+        type: "float"
+        value: 0.921  # Exact expected value
+        tolerance: 0.001  # ±0.001 tolerance
+      status: "success"
+    validation:
+      required_fields: ["currency_pair", "date", "rate", "status"]
+      tolerance_check: true
+
+  # Example 3: Volatility calculation
+  - id: "market_example_003"
+    name: "Calculate 30-day volatility with tolerance"
+    input:
+      query: "What is the 30-day volatility of SPY ending on 2024-03-31?"
+      symbol: "SPY"
+      end_date: "2024-03-31"
+      period_days: 30
+      metric: "volatility"
+    expected_output:
+      type: "volatility_data"
+      symbol: "SPY"
+      end_date: "2024-03-31"
+      volatility:
+        type: "float"
+        value: 0.143  # Exact expected value
+        tolerance: 0.005  # ±0.005 tolerance
+      status: "success"
+    validation:
+      required_fields: ["symbol", "end_date", "volatility", "status"]
+      tolerance_check: true

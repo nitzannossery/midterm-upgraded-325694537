@@ -1,0 +1,8 @@
+id,query,expected_output_type,context
+fundamental_human_001,"Get income statement for AAPL Q1 2024 and explain the key financial trends","income_statement_with_analysis","Financial statement analysis"
+fundamental_human_002,"Calculate P/E ratio for MSFT and explain whether the stock is overvalued or undervalued","pe_ratio_with_valuation_analysis","Valuation analysis"
+fundamental_human_003,"Get balance sheet for GOOGL FY 2023 and explain the company's financial health","balance_sheet_with_health_assessment","Financial health assessment"
+fundamental_human_004,"Analyze news sentiment for AAPL over the last 30 days and explain the impact on stock price","sentiment_analysis_with_price_impact","Sentiment and price correlation"
+fundamental_human_005,"Calculate ROE, ROA, and profit margin for MSFT and compare to industry averages","ratios_with_industry_comparison","Ratio analysis with benchmarking"
+fundamental_human_006,"Get cash flow statement for AAPL Q2 2024 and explain the company's cash generation ability","cash_flow_with_analysis","Cash flow analysis"
+fundamental_human_007,"Calculate debt-to-equity ratio for GOOGL and assess the company's leverage risk","leverage_analysis_with_risk_assessment","Leverage and risk analysis"

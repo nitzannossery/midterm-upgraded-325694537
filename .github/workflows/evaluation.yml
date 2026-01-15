@@ -1,0 +1,111 @@
+name: Evaluation Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  hard-evaluations:
+    name: Hard Evaluations
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run hard evaluations
+      run: |
+        python evaluation/runners/run_hard_evals.py
+      continue-on-error: false
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: hard-eval-results
+        path: evaluation/reports/
+  
+  llm-evaluations:
+    name: LLM Evaluations (Smoke Test)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run LLM evaluations (sample)
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python evaluation/runners/run_llm_evals.py --sample-size 5
+      continue-on-error: false
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: llm-eval-results
+        path: evaluation/reports/
+  
+  full-evaluation:
+    name: Full Evaluation Suite
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+    needs: [hard-evaluations]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Download hard eval results
+      uses: actions/download-artifact@v3
+      with:
+        name: hard-eval-results
+        path: evaluation/reports/
+    
+    - name: Run full LLM evaluations
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python evaluation/runners/run_llm_evals.py
+      continue-on-error: true
+    
+    - name: Generate comprehensive report
+      run: |
+        python evaluation/runners/run_all_evals.py --skip-human
+      continue-on-error: true
+    
+    - name: Upload comprehensive results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: full-eval-results
+        path: evaluation/reports/

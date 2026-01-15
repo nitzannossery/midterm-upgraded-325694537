@@ -1,0 +1,8 @@
+id,query,scenario,question_1_understandable,question_2_trust_decision_support,question_3_risks_clearly_explained,question_4_overstated_certainty,question_5_free_text_feedback,evaluator
+summarizer_hitl_001,"Should I invest in AAPL? Consider market data, fundamentals, and risk","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_002,"Compare AAPL and MSFT as investment options considering all factors","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_003,"Is now a good time to buy GOOGL? Analyze current market conditions and fundamentals","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_004,"What is the investment outlook for technology sector? Consider AAPL, MSFT, GOOGL","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_005,"Should I rebalance my portfolio of 50% AAPL, 50% MSFT? Consider risk and fundamentals","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_006,"What are the key risks and opportunities for investing in TSLA?","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,
+summarizer_hitl_007,"Is AAPL overvalued or undervalued? Provide comprehensive analysis","You are a junior analyst reviewing this AI-generated investment recommendation.",,,,,,

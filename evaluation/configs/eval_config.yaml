@@ -1,0 +1,169 @@
+# Evaluation Configuration
+# Central configuration for all evaluation types and agents
+
+# Global Settings
+global:
+  output_dir: "evaluation/reports"
+  jsonl_dir: "evaluation/reports/jsonl"
+  tolerance:
+    numerical: 0.001  # For floating point comparisons
+    percentage: 0.01  # 1% tolerance for percentage-based metrics
+    date_days: 1     # Days tolerance for date comparisons
+
+# Agent-specific configurations
+agents:
+  market_data:
+    name: "Market Data Agent"
+    description: "Retrieves prices, volume, returns, benchmarks, and FX data"
+    hard_tests:
+      count: 25
+      file: "evaluation/hard/market_agent_tests.yaml"
+      pass_threshold: 0.90  # 90% must pass
+    llm_tests:
+      count: 15
+      file: "evaluation/datasets/market_agent/llm_test_cases.jsonl"
+      pass_threshold: 0.80
+      dimensions:
+        - correctness
+        - completeness
+        - faithfulness
+        - clarity
+      min_score_per_dimension: 3.0  # Out of 5.0
+    human_tests:
+      count: 7
+      file: "evaluation/datasets/market_agent/human_test_cases.csv"
+      rubric_file: "evaluation/human/market_agent_rubric.md"
+      pass_threshold: 0.75
+      dimensions:
+        - usefulness
+        - trustworthiness
+        - reasoning_quality
+        - decision_confidence
+      min_score_per_dimension: 3.0  # Out of 5.0
+
+  fundamental_news:
+    name: "Fundamental & News Agent"
+    description: "Extracts financial statements, ratios, and company news"
+    hard_tests:
+      count: 25
+      file: "evaluation/hard/fundamental_agent_tests.yaml"
+      pass_threshold: 0.90
+    retrieval_tests:
+      count: 12
+      file: "evaluation/datasets/fundamental_agent/retrieval_test_cases.jsonl"
+      pass_threshold: 0.85
+      checks:
+        - document_retrieved
+        - value_quoted_from_source
+        - citation_included
+        - value_consistent_with_document
+        - explicit_uncertainty_when_no_source
+    llm_tests:
+      count: 15
+      file: "evaluation/datasets/fundamental_agent/llm_test_cases.jsonl"
+      pass_threshold: 0.80
+      dimensions:
+        - correctness
+        - completeness
+        - faithfulness
+        - clarity
+      min_score_per_dimension: 3.0
+    human_tests:
+      count: 7
+      file: "evaluation/datasets/fundamental_agent/human_test_cases.csv"
+      rubric_file: "evaluation/human/fundamental_agent_rubric.md"
+      pass_threshold: 0.75
+      dimensions:
+        - usefulness
+        - trustworthiness
+        - reasoning_quality
+        - decision_confidence
+      min_score_per_dimension: 3.0
+
+  portfolio_risk:
+    name: "Portfolio & Risk Agent"
+    description: "Computes risk metrics and investment recommendations"
+    hard_tests:
+      count: 25
+      file: "evaluation/hard/portfolio_agent_tests.yaml"
+      pass_threshold: 0.90
+    llm_tests:
+      count: 15
+      file: "evaluation/datasets/portfolio_agent/llm_test_cases.jsonl"
+      pass_threshold: 0.80
+      dimensions:
+        - correctness
+        - completeness
+        - faithfulness
+        - clarity
+        - risk_awareness
+      min_score_per_dimension: 3.0
+      pass_rule: "average_score >= 4.0 AND faithfulness >= 4.5"
+    human_tests:
+      count: 7
+      file: "evaluation/datasets/portfolio_agent/human_test_cases.csv"
+      rubric_file: "evaluation/human/portfolio_agent_rubric.md"
+      pass_threshold: 0.75
+      dimensions:
+        - usefulness
+        - trustworthiness
+        - reasoning_quality
+        - decision_confidence
+      min_score_per_dimension: 3.0
+
+  summarizer:
+    name: "Final Answer / Summarizer Agent"
+    description: "Synthesizes outputs from all agents into coherent answer"
+    hard_tests:
+      enabled: false  # No hard ground-truth tests
+    llm_tests:
+      count: 15
+      file: "evaluation/datasets/summarizer/llm_test_cases.jsonl"
+      pass_threshold: 0.80
+      dimensions:
+        - coherence
+        - completeness
+        - clarity
+        - synthesis_quality
+        - reflects_agent_outputs
+        - no_new_facts
+        - clear_decision_rationale
+      min_score_per_dimension: 3.0
+    human_tests:
+      count: 7
+      file: "evaluation/datasets/summarizer/human_test_cases.csv"
+      rubric_file: "evaluation/human/summarizer_rubric.md"
+      pass_threshold: 0.75
+      dimensions:
+        - understandability
+        - trust_for_decision_support
+        - risks_clearly_explained
+        - appropriate_uncertainty
+        - free_text_feedback
+      min_score_per_dimension: 3.0
+      hitl_format: true  # Human-in-the-Loop format
+
+# LLM Evaluation Settings
+llm_eval:
+  model: "gpt-4"  # Model to use as judge
+  temperature: 0.0  # Deterministic evaluation
+  max_tokens: 500
+  system_prompt_template: "evaluation/llm/prompts/system_prompt.txt"
+  evaluation_prompt_template: "evaluation/llm/prompts/evaluation_prompt.txt"
+  response_format: "json"  # Must return strict JSON
+
+# Reporting Settings
+reporting:
+  format: ["jsonl", "markdown", "json"]
+  include_failures: true
+  include_metrics: true
+  include_patterns: true
+  markdown_template: "evaluation/reports/template.md"
+
+# CI/CD Settings
+ci:
+  run_hard_evals: true
+  run_llm_evals: true
+  llm_eval_sample_size: 5  # Run subset in CI
+  fail_on_threshold_violation: true
+  fail_on_hard_eval_failure: true

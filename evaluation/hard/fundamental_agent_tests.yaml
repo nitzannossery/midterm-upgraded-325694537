@@ -1,0 +1,569 @@
+# Hard Evaluation Tests for Fundamental & News Agent
+# Deterministic tests with exact or tolerance-based expected outputs
+
+tests:
+  # Test 1: Basic financial statement retrieval
+  - id: "fundamental_001"
+    name: "Retrieve income statement"
+    input:
+      query: "Get income statement for AAPL for Q1 2024"
+      symbol: "AAPL"
+      statement_type: "income_statement"
+      period: "Q1 2024"
+    expected_output:
+      type: "income_statement"
+      symbol: "AAPL"
+      period: "Q1 2024"
+      required_fields: ["revenue", "net_income", "eps"]
+      revenue:
+        type: "float"
+        min: 0.0
+      net_income:
+        type: "float"
+      eps:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "revenue", "net_income", "eps", "status"]
+      all_values_numeric: true
+      no_hallucinations: true
+
+  # Test 2: Balance sheet retrieval
+  - id: "fundamental_002"
+    name: "Retrieve balance sheet"
+    input:
+      query: "Get balance sheet for MSFT for fiscal year 2023"
+      symbol: "MSFT"
+      statement_type: "balance_sheet"
+      period: "FY 2023"
+    expected_output:
+      type: "balance_sheet"
+      symbol: "MSFT"
+      period: "FY 2023"
+      required_fields: ["total_assets", "total_liabilities", "shareholders_equity"]
+      total_assets:
+        type: "float"
+        min: 0.0
+      total_liabilities:
+        type: "float"
+        min: 0.0
+      shareholders_equity:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "total_assets", "total_liabilities", "shareholders_equity", "status"]
+      assets_equation: true  # assets = liabilities + equity
+      no_hallucinations: true
+
+  # Test 3: Cash flow statement
+  - id: "fundamental_003"
+    name: "Retrieve cash flow statement"
+    input:
+      query: "Get cash flow statement for GOOGL for Q2 2024"
+      symbol: "GOOGL"
+      statement_type: "cash_flow"
+      period: "Q2 2024"
+    expected_output:
+      type: "cash_flow_statement"
+      symbol: "GOOGL"
+      period: "Q2 2024"
+      required_fields: ["operating_cash_flow", "investing_cash_flow", "financing_cash_flow", "free_cash_flow"]
+      operating_cash_flow:
+        type: "float"
+      free_cash_flow:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "operating_cash_flow", "free_cash_flow", "status"]
+      all_values_numeric: true
+      no_hallucinations: true
+
+  # Test 4: P/E ratio calculation
+  - id: "fundamental_004"
+    name: "Calculate P/E ratio"
+    input:
+      query: "Calculate P/E ratio for AAPL"
+      symbol: "AAPL"
+      metric: "pe_ratio"
+    expected_output:
+      type: "ratio"
+      symbol: "AAPL"
+      metric: "pe_ratio"
+      value:
+        type: "float"
+        min: 5.0
+        max: 100.0  # Reasonable P/E range
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_positive: true
+      value_reasonable: true
+      no_hallucinations: true
+
+  # Test 5: Debt-to-equity ratio
+  - id: "fundamental_005"
+    name: "Calculate debt-to-equity ratio"
+    input:
+      query: "Calculate debt-to-equity ratio for MSFT"
+      symbol: "MSFT"
+      metric: "debt_to_equity"
+    expected_output:
+      type: "ratio"
+      symbol: "MSFT"
+      metric: "debt_to_equity"
+      value:
+        type: "float"
+        min: 0.0
+        max: 10.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_non_negative: true
+      no_hallucinations: true
+
+  # Test 6: ROE calculation
+  - id: "fundamental_006"
+    name: "Calculate return on equity"
+    input:
+      query: "Calculate ROE for AAPL for fiscal year 2023"
+      symbol: "AAPL"
+      metric: "roe"
+      period: "FY 2023"
+    expected_output:
+      type: "ratio"
+      symbol: "AAPL"
+      metric: "roe"
+      period: "FY 2023"
+      value:
+        type: "float"
+        min: -1.0
+        max: 1.0  # ROE as percentage/decimal
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "period", "status"]
+      value_finite: true
+      no_hallucinations: true
+
+  # Test 7: Current ratio
+  - id: "fundamental_007"
+    name: "Calculate current ratio"
+    input:
+      query: "Calculate current ratio for GOOGL"
+      symbol: "GOOGL"
+      metric: "current_ratio"
+    expected_output:
+      type: "ratio"
+      symbol: "GOOGL"
+      metric: "current_ratio"
+      value:
+        type: "float"
+        min: 0.0
+        max: 20.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_positive: true
+      no_hallucinations: true
+
+  # Test 8: News sentiment analysis
+  - id: "fundamental_008"
+    name: "Analyze news sentiment for company"
+    input:
+      query: "Analyze news sentiment for AAPL from 2024-01-01 to 2024-01-31"
+      symbol: "AAPL"
+      start_date: "2024-01-01"
+      end_date: "2024-01-31"
+      analysis_type: "sentiment"
+    expected_output:
+      type: "sentiment_analysis"
+      symbol: "AAPL"
+      sentiment_score:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      sentiment_label:
+        type: "string"
+        enum: ["positive", "negative", "neutral"]
+      article_count:
+        type: "int"
+        min: 0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "sentiment_score", "sentiment_label", "article_count", "status"]
+      sentiment_score_valid: true
+      sentiment_label_valid: true
+      no_hallucinations: true
+
+  # Test 9: Multiple ratios at once
+  - id: "fundamental_009"
+    name: "Calculate multiple financial ratios"
+    input:
+      query: "Calculate P/E, P/B, and ROE for AAPL"
+      symbol: "AAPL"
+      metrics: ["pe_ratio", "pb_ratio", "roe"]
+    expected_output:
+      type: "multiple_ratios"
+      symbol: "AAPL"
+      ratios:
+        type: "dict"
+        required_keys: ["pe_ratio", "pb_ratio", "roe"]
+      all_ratios_present: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "ratios", "all_ratios_present", "status"]
+      all_ratios_numeric: true
+      no_hallucinations: true
+
+  # Test 10: Historical ratio trends
+  - id: "fundamental_010"
+    name: "Get historical P/E ratio trend"
+    input:
+      query: "Get P/E ratio trend for AAPL for last 4 quarters"
+      symbol: "AAPL"
+      metric: "pe_ratio"
+      periods: 4
+      frequency: "quarterly"
+    expected_output:
+      type: "ratio_trend"
+      symbol: "AAPL"
+      metric: "pe_ratio"
+      data_points:
+        type: "int"
+        exact: 4
+      values:
+        type: "array"
+        length: 4
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "data_points", "values", "status"]
+      correct_data_point_count: true
+      all_values_numeric: true
+      no_hallucinations: true
+
+  # Test 11: Invalid symbol handling
+  - id: "fundamental_011"
+    name: "Handle invalid symbol gracefully"
+    input:
+      query: "Get income statement for INVALID_SYMBOL_XYZ"
+      symbol: "INVALID_SYMBOL_XYZ"
+      statement_type: "income_statement"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_symbol"
+      message_contains: ["symbol", "not found", "invalid"]
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+      no_hallucinated_data: true
+
+  # Test 12: Invalid period handling
+  - id: "fundamental_012"
+    name: "Handle invalid period gracefully"
+    input:
+      query: "Get income statement for AAPL for Q99 2099"
+      symbol: "AAPL"
+      statement_type: "income_statement"
+      period: "Q99 2099"
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_period"
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+      no_hallucinated_data: true
+
+  # Test 13: Data source citation
+  - id: "fundamental_013"
+    name: "Include data source citations"
+    input:
+      query: "Get income statement for AAPL for Q1 2024 with sources"
+      symbol: "AAPL"
+      statement_type: "income_statement"
+      period: "Q1 2024"
+      include_sources: true
+    expected_output:
+      type: "income_statement"
+      symbol: "AAPL"
+      period: "Q1 2024"
+      data_sources:
+        type: "array"
+        min_length: 1
+      all_values_cited: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "data_sources", "all_values_cited", "status"]
+      sources_present: true
+      no_uncited_claims: true
+
+  # Test 14: Revenue growth calculation
+  - id: "fundamental_014"
+    name: "Calculate revenue growth rate"
+    input:
+      query: "Calculate revenue growth rate for AAPL from Q1 2023 to Q1 2024"
+      symbol: "AAPL"
+      metric: "revenue_growth"
+      period_start: "Q1 2023"
+      period_end: "Q1 2024"
+    expected_output:
+      type: "growth_metric"
+      symbol: "AAPL"
+      metric: "revenue_growth"
+      growth_rate:
+        type: "float"
+        min: -1.0
+        max: 5.0  # Reasonable growth range
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "growth_rate", "status"]
+      growth_rate_finite: true
+      no_hallucinations: true
+
+  # Test 15: Profit margin calculation
+  - id: "fundamental_015"
+    name: "Calculate profit margin"
+    input:
+      query: "Calculate profit margin for MSFT for Q2 2024"
+      symbol: "MSFT"
+      metric: "profit_margin"
+      period: "Q2 2024"
+    expected_output:
+      type: "ratio"
+      symbol: "MSFT"
+      metric: "profit_margin"
+      period: "Q2 2024"
+      value:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "period", "status"]
+      value_finite: true
+      no_hallucinations: true
+
+  # Test 16: News article retrieval
+  - id: "fundamental_016"
+    name: "Retrieve recent news articles"
+    input:
+      query: "Get recent news articles about AAPL from last 7 days"
+      symbol: "AAPL"
+      days: 7
+      content_type: "news_articles"
+    expected_output:
+      type: "news_articles"
+      symbol: "AAPL"
+      articles:
+        type: "array"
+        min_length: 0
+      article_count:
+        type: "int"
+        min: 0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "articles", "article_count", "status"]
+      articles_have_required_fields: ["title", "date", "source"]
+      no_hallucinated_articles: true
+
+  # Test 17: Earnings surprise
+  - id: "fundamental_017"
+    name: "Calculate earnings surprise"
+    input:
+      query: "Get earnings surprise for AAPL for Q1 2024"
+      symbol: "AAPL"
+      metric: "earnings_surprise"
+      period: "Q1 2024"
+    expected_output:
+      type: "earnings_surprise"
+      symbol: "AAPL"
+      period: "Q1 2024"
+      surprise_percentage:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "surprise_percentage", "status"]
+      surprise_percentage_finite: true
+      no_hallucinations: true
+
+  # Test 18: Book value per share
+  - id: "fundamental_018"
+    name: "Calculate book value per share"
+    input:
+      query: "Calculate book value per share for GOOGL"
+      symbol: "GOOGL"
+      metric: "book_value_per_share"
+    expected_output:
+      type: "ratio"
+      symbol: "GOOGL"
+      metric: "book_value_per_share"
+      value:
+        type: "float"
+        min: 0.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_positive: true
+      no_hallucinations: true
+
+  # Test 19: Dividend yield
+  - id: "fundamental_019"
+    name: "Calculate dividend yield"
+    input:
+      query: "Calculate dividend yield for AAPL"
+      symbol: "AAPL"
+      metric: "dividend_yield"
+    expected_output:
+      type: "ratio"
+      symbol: "AAPL"
+      metric: "dividend_yield"
+      value:
+        type: "float"
+        min: 0.0
+        max: 0.2  # 20% max reasonable yield
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_non_negative: true
+      no_hallucinations: true
+
+  # Test 20: Operating margin
+  - id: "fundamental_020"
+    name: "Calculate operating margin"
+    input:
+      query: "Calculate operating margin for MSFT for Q3 2024"
+      symbol: "MSFT"
+      metric: "operating_margin"
+      period: "Q3 2024"
+    expected_output:
+      type: "ratio"
+      symbol: "MSFT"
+      metric: "operating_margin"
+      period: "Q3 2024"
+      value:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "period", "status"]
+      value_finite: true
+      no_hallucinations: true
+
+  # Test 21: Asset turnover ratio
+  - id: "fundamental_021"
+    name: "Calculate asset turnover ratio"
+    input:
+      query: "Calculate asset turnover for AAPL for fiscal year 2023"
+      symbol: "AAPL"
+      metric: "asset_turnover"
+      period: "FY 2023"
+    expected_output:
+      type: "ratio"
+      symbol: "AAPL"
+      metric: "asset_turnover"
+      period: "FY 2023"
+      value:
+        type: "float"
+        min: 0.0
+        max: 10.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "period", "status"]
+      value_positive: true
+      no_hallucinations: true
+
+  # Test 22: Quick ratio
+  - id: "fundamental_022"
+    name: "Calculate quick ratio"
+    input:
+      query: "Calculate quick ratio for GOOGL"
+      symbol: "GOOGL"
+      metric: "quick_ratio"
+    expected_output:
+      type: "ratio"
+      symbol: "GOOGL"
+      metric: "quick_ratio"
+      value:
+        type: "float"
+        min: 0.0
+        max: 20.0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      value_positive: true
+      no_hallucinations: true
+
+  # Test 23: News keyword extraction
+  - id: "fundamental_023"
+    name: "Extract key topics from news"
+    input:
+      query: "Extract key topics from AAPL news in last 30 days"
+      symbol: "AAPL"
+      days: 30
+      analysis_type: "topic_extraction"
+    expected_output:
+      type: "topic_analysis"
+      symbol: "AAPL"
+      topics:
+        type: "array"
+        min_length: 0
+      topic_count:
+        type: "int"
+        min: 0
+      status: "success"
+    validation:
+      required_fields: ["symbol", "topics", "topic_count", "status"]
+      topics_are_strings: true
+      no_hallucinated_topics: true
+
+  # Test 24: Financial statement consistency
+  - id: "fundamental_024"
+    name: "Verify financial statement consistency"
+    input:
+      query: "Verify income statement and balance sheet consistency for AAPL Q1 2024"
+      symbol: "AAPL"
+      period: "Q1 2024"
+      check_consistency: true
+    expected_output:
+      type: "consistency_check"
+      symbol: "AAPL"
+      period: "Q1 2024"
+      consistent: true
+      inconsistencies:
+        type: "array"
+        max_length: 0  # Should be empty if consistent
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "consistent", "inconsistencies", "status"]
+      either_consistent_or_has_issues: true
+      no_hallucinations: true
+
+  # Test 25: Comprehensive fundamental snapshot
+  - id: "fundamental_025"
+    name: "Generate comprehensive fundamental snapshot"
+    input:
+      query: "Generate comprehensive fundamental snapshot for AAPL"
+      symbol: "AAPL"
+      snapshot_type: "comprehensive"
+    expected_output:
+      type: "fundamental_snapshot"
+      symbol: "AAPL"
+      ratios:
+        type: "dict"
+        min_keys: 5
+      financial_statements:
+        type: "dict"
+        required_keys: ["income_statement", "balance_sheet", "cash_flow"]
+      news_sentiment:
+        type: "dict"
+        required_keys: ["sentiment_score", "sentiment_label"]
+      all_data_present: true
+      status: "success"
+    validation:
+      required_fields: ["symbol", "ratios", "financial_statements", "news_sentiment", "all_data_present", "status"]
+      comprehensive_data_present: true
+      no_hallucinations: true
+      all_values_cited: true

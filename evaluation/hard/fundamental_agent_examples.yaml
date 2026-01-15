@@ -1,0 +1,63 @@
+# Example Hard Evaluation Tests - Fundamental & News Agent
+# These examples match the specific format requested with exact expected values and tolerances
+
+examples:
+  # Example 1: Revenue with percentage tolerance
+  - id: "fundamental_example_001"
+    name: "Get revenue with percentage tolerance"
+    input:
+      query: "What was MSFT revenue in FY2023?"
+      symbol: "MSFT"
+      period: "FY2023"
+      metric: "revenue"
+    expected_output:
+      type: "financial_metric"
+      symbol: "MSFT"
+      period: "FY2023"
+      revenue:
+        type: "float"
+        value: 211900000000  # 211.9B USD
+        tolerance_percentage: 0.01  # ±1% tolerance
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "revenue", "status"]
+      percentage_tolerance_check: true
+
+  # Example 2: Gross margin with percentage tolerance
+  - id: "fundamental_example_002"
+    name: "Get gross margin with percentage tolerance"
+    input:
+      query: "What is NVDA gross margin reported in the last annual filing?"
+      symbol: "NVDA"
+      metric: "gross_margin"
+      filing_type: "annual"
+    expected_output:
+      type: "ratio"
+      symbol: "NVDA"
+      metric: "gross_margin"
+      value:
+        type: "float"
+        value: 0.72  # 72.0%
+        tolerance_percentage: 0.01  # ±1% tolerance
+      status: "success"
+    validation:
+      required_fields: ["symbol", "metric", "value", "status"]
+      percentage_tolerance_check: true
+
+  # Example 3: Binary yes/no question
+  - id: "fundamental_example_003"
+    name: "Binary growth question"
+    input:
+      query: "Did Apple report positive YoY revenue growth in Q4 2023?"
+      symbol: "AAPL"
+      period: "Q4 2023"
+      metric: "yoy_revenue_growth"
+    expected_output:
+      type: "binary_answer"
+      symbol: "AAPL"
+      period: "Q4 2023"
+      answer: "YES"  # Exact match required
+      status: "success"
+    validation:
+      required_fields: ["symbol", "period", "answer", "status"]
+      exact_match: true

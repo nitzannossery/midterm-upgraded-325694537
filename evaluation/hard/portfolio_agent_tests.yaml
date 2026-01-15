@@ -1,0 +1,620 @@
+# Hard Evaluation Tests for Portfolio & Risk Agent
+# Deterministic tests with exact or tolerance-based expected outputs
+
+tests:
+  # Test 1: Portfolio volatility calculation
+  - id: "portfolio_001"
+    name: "Calculate portfolio volatility"
+    input:
+      query: "Calculate portfolio volatility for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "volatility"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "volatility"
+      value:
+        type: "float"
+        min: 0.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_positive: true
+      weights_sum_to_one: true
+
+  # Test 2: Portfolio beta calculation
+  - id: "portfolio_002"
+    name: "Calculate portfolio beta"
+    input:
+      query: "Calculate portfolio beta against SPY for portfolio: 60% AAPL, 40% GOOGL"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.6
+        - symbol: "GOOGL"
+          weight: 0.4
+      benchmark: "SPY"
+      metric: "beta"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "beta"
+      benchmark: "SPY"
+      value:
+        type: "float"
+        min: -5.0
+        max: 5.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "benchmark", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 3: Maximum drawdown calculation
+  - id: "portfolio_003"
+    name: "Calculate maximum drawdown"
+    input:
+      query: "Calculate maximum drawdown for portfolio: 100% AAPL over last year"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 1.0
+      metric: "max_drawdown"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "max_drawdown"
+      value:
+        type: "float"
+        min: -1.0
+        max: 0.0  # Drawdown is negative or zero
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_non_positive: true
+      weights_sum_to_one: true
+
+  # Test 4: Value at Risk (VaR) calculation
+  - id: "portfolio_004"
+    name: "Calculate Value at Risk"
+    input:
+      query: "Calculate 95% VaR for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "var"
+      confidence_level: 0.95
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "var"
+      confidence_level: 0.95
+      value:
+        type: "float"
+        max: 0.0  # VaR is typically negative
+      status: "success"
+    validation:
+      required_fields: ["metric", "confidence_level", "value", "status"]
+      confidence_level_valid: true
+      weights_sum_to_one: true
+
+  # Test 5: Sharpe ratio calculation
+  - id: "portfolio_005"
+    name: "Calculate Sharpe ratio"
+    input:
+      query: "Calculate Sharpe ratio for portfolio: 40% AAPL, 60% GOOGL"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.4
+        - symbol: "GOOGL"
+          weight: 0.6
+      metric: "sharpe_ratio"
+      risk_free_rate: 0.02
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "sharpe_ratio"
+      value:
+        type: "float"
+        min: -10.0
+        max: 10.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 6: Portfolio optimization (minimize risk)
+  - id: "portfolio_006"
+    name: "Optimize portfolio to minimize risk"
+    input:
+      query: "Optimize portfolio of AAPL, MSFT, GOOGL to minimize risk"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      objective: "minimize_risk"
+      constraints:
+        min_weight: 0.0
+        max_weight: 1.0
+    expected_output:
+      type: "optimized_portfolio"
+      objective: "minimize_risk"
+      weights:
+        type: "dict"
+        required_keys: ["AAPL", "MSFT", "GOOGL"]
+      weights_sum:
+        type: "float"
+        exact: 1.0
+        tolerance: 0.001
+      status: "success"
+    validation:
+      required_fields: ["objective", "weights", "weights_sum", "status"]
+      weights_sum_to_one: true
+      all_weights_valid: true
+
+  # Test 7: Portfolio optimization (maximize Sharpe)
+  - id: "portfolio_007"
+    name: "Optimize portfolio to maximize Sharpe ratio"
+    input:
+      query: "Optimize portfolio of AAPL, MSFT, GOOGL to maximize Sharpe ratio"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      objective: "maximize_sharpe"
+      risk_free_rate: 0.02
+    expected_output:
+      type: "optimized_portfolio"
+      objective: "maximize_sharpe"
+      weights:
+        type: "dict"
+        required_keys: ["AAPL", "MSFT", "GOOGL"]
+      weights_sum:
+        type: "float"
+        exact: 1.0
+        tolerance: 0.001
+      sharpe_ratio:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["objective", "weights", "weights_sum", "sharpe_ratio", "status"]
+      weights_sum_to_one: true
+      all_weights_valid: true
+
+  # Test 8: Risk constraint validation
+  - id: "portfolio_008"
+    name: "Validate portfolio against risk constraints"
+    input:
+      query: "Check if portfolio 50% AAPL, 50% MSFT meets max volatility of 0.20"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      constraint:
+        type: "max_volatility"
+        value: 0.20
+    expected_output:
+      type: "constraint_check"
+      constraint_met: true
+      actual_value:
+        type: "float"
+      constraint_value: 0.20
+      status: "success"
+    validation:
+      required_fields: ["constraint_met", "actual_value", "constraint_value", "status"]
+      constraint_logic_correct: true
+      weights_sum_to_one: true
+
+  # Test 9: Correlation matrix
+  - id: "portfolio_009"
+    name: "Calculate correlation matrix for portfolio"
+    input:
+      query: "Calculate correlation matrix for AAPL, MSFT, GOOGL"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      metric: "correlation_matrix"
+      period: "1y"
+    expected_output:
+      type: "correlation_matrix"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      matrix:
+        type: "dict"
+        required_keys: ["AAPL", "MSFT", "GOOGL"]
+      all_correlations_valid: true
+      status: "success"
+    validation:
+      required_fields: ["symbols", "matrix", "all_correlations_valid", "status"]
+      correlations_between_minus_one_one: true
+      matrix_symmetric: true
+
+  # Test 10: Stress test scenario
+  - id: "portfolio_010"
+    name: "Run stress test scenario"
+    input:
+      query: "Run stress test: market crash -20% for portfolio 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      scenario:
+        type: "market_crash"
+        market_decline: -0.20
+    expected_output:
+      type: "stress_test_result"
+      scenario: "market_crash"
+      portfolio_loss:
+        type: "float"
+        max: 0.0  # Loss is negative
+      status: "success"
+    validation:
+      required_fields: ["scenario", "portfolio_loss", "status"]
+      loss_reasonable: true
+      weights_sum_to_one: true
+
+  # Test 11: Risk profile matching
+  - id: "portfolio_011"
+    name: "Match portfolio to risk profile"
+    input:
+      query: "Check if portfolio 30% AAPL, 70% BND matches conservative risk profile"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.3
+        - symbol: "BND"
+          weight: 0.7
+      risk_profile: "conservative"
+    expected_output:
+      type: "risk_profile_match"
+      risk_profile: "conservative"
+      matches: true
+      portfolio_risk_level:
+        type: "string"
+        enum: ["conservative", "moderate", "aggressive"]
+      status: "success"
+    validation:
+      required_fields: ["risk_profile", "matches", "portfolio_risk_level", "status"]
+      risk_level_valid: true
+      weights_sum_to_one: true
+
+  # Test 12: Invalid portfolio weights
+  - id: "portfolio_012"
+    name: "Handle invalid portfolio weights"
+    input:
+      query: "Calculate volatility for portfolio: 50% AAPL, 60% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.6
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_weights"
+      message_contains: ["weights", "sum", "1.0"]
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+
+  # Test 13: Negative weights handling
+  - id: "portfolio_013"
+    name: "Handle negative portfolio weights"
+    input:
+      query: "Calculate volatility for portfolio: -10% AAPL, 110% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: -0.1
+        - symbol: "MSFT"
+          weight: 1.1
+    expected_output:
+      type: "error"
+      status: "error"
+      error_type: "invalid_weights"
+    validation:
+      required_fields: ["status", "error_type"]
+      status_is_error: true
+
+  # Test 14: Expected return calculation
+  - id: "portfolio_014"
+    name: "Calculate expected portfolio return"
+    input:
+      query: "Calculate expected return for portfolio: 40% AAPL, 60% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.4
+        - symbol: "MSFT"
+          weight: 0.6
+      metric: "expected_return"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "expected_return"
+      value:
+        type: "float"
+        min: -1.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 15: Conditional Value at Risk (CVaR)
+  - id: "portfolio_015"
+    name: "Calculate Conditional Value at Risk"
+    input:
+      query: "Calculate 95% CVaR for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "cvar"
+      confidence_level: 0.95
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "cvar"
+      confidence_level: 0.95
+      value:
+        type: "float"
+        max: 0.0  # CVaR is typically negative
+      status: "success"
+    validation:
+      required_fields: ["metric", "confidence_level", "value", "status"]
+      confidence_level_valid: true
+      weights_sum_to_one: true
+
+  # Test 16: Portfolio rebalancing recommendation
+  - id: "portfolio_016"
+    name: "Generate rebalancing recommendations"
+    input:
+      query: "Recommend rebalancing for portfolio: 60% AAPL, 40% MSFT to target 50/50"
+      current_portfolio:
+        - symbol: "AAPL"
+          weight: 0.6
+        - symbol: "MSFT"
+          weight: 0.4
+      target_portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+    expected_output:
+      type: "rebalancing_recommendation"
+      adjustments:
+        type: "dict"
+        required_keys: ["AAPL", "MSFT"]
+      total_adjustment:
+        type: "float"
+        exact: 0.0
+        tolerance: 0.001
+      status: "success"
+    validation:
+      required_fields: ["adjustments", "total_adjustment", "status"]
+      adjustments_sum_to_zero: true
+
+  # Test 17: Sector concentration risk
+  - id: "portfolio_017"
+    name: "Calculate sector concentration"
+    input:
+      query: "Calculate sector concentration for portfolio: 50% AAPL, 30% MSFT, 20% GOOGL"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.3
+        - symbol: "GOOGL"
+          weight: 0.2
+      metric: "sector_concentration"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "sector_concentration"
+      value:
+        type: "float"
+        min: 0.0
+        max: 1.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_between_zero_one: true
+      weights_sum_to_one: true
+
+  # Test 18: Monte Carlo simulation
+  - id: "portfolio_018"
+    name: "Run Monte Carlo simulation"
+    input:
+      query: "Run 1000-iteration Monte Carlo simulation for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      simulation:
+        type: "monte_carlo"
+        iterations: 1000
+        horizon: "1y"
+    expected_output:
+      type: "monte_carlo_result"
+      iterations: 1000
+      results:
+        type: "array"
+        length: 1000
+      mean_return:
+        type: "float"
+      percentile_5:
+        type: "float"
+      percentile_95:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["iterations", "results", "mean_return", "percentile_5", "percentile_95", "status"]
+      correct_iteration_count: true
+      percentiles_ordered: true
+      weights_sum_to_one: true
+
+  # Test 19: Efficient frontier
+  - id: "portfolio_019"
+    name: "Generate efficient frontier"
+    input:
+      query: "Generate efficient frontier for AAPL, MSFT, GOOGL"
+      symbols: ["AAPL", "MSFT", "GOOGL"]
+      metric: "efficient_frontier"
+      risk_free_rate: 0.02
+    expected_output:
+      type: "efficient_frontier"
+      portfolios:
+        type: "array"
+        min_length: 10
+      all_portfolios_valid: true
+      status: "success"
+    validation:
+      required_fields: ["portfolios", "all_portfolios_valid", "status"]
+      portfolios_have_required_fields: ["weights", "return", "risk"]
+      all_weights_sum_to_one: true
+
+  # Test 20: Risk-adjusted return
+  - id: "portfolio_020"
+    name: "Calculate risk-adjusted return"
+    input:
+      query: "Calculate risk-adjusted return for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "risk_adjusted_return"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "risk_adjusted_return"
+      value:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 21: Tracking error
+  - id: "portfolio_021"
+    name: "Calculate tracking error"
+    input:
+      query: "Calculate tracking error against SPY for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      benchmark: "SPY"
+      metric: "tracking_error"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "tracking_error"
+      benchmark: "SPY"
+      value:
+        type: "float"
+        min: 0.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "benchmark", "value", "status"]
+      value_non_negative: true
+      weights_sum_to_one: true
+
+  # Test 22: Information ratio
+  - id: "portfolio_022"
+    name: "Calculate information ratio"
+    input:
+      query: "Calculate information ratio against SPY for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      benchmark: "SPY"
+      metric: "information_ratio"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "information_ratio"
+      benchmark: "SPY"
+      value:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["metric", "benchmark", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 23: Downside deviation
+  - id: "portfolio_023"
+    name: "Calculate downside deviation"
+    input:
+      query: "Calculate downside deviation for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "downside_deviation"
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "downside_deviation"
+      value:
+        type: "float"
+        min: 0.0
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_non_negative: true
+      weights_sum_to_one: true
+
+  # Test 24: Sortino ratio
+  - id: "portfolio_024"
+    name: "Calculate Sortino ratio"
+    input:
+      query: "Calculate Sortino ratio for portfolio: 50% AAPL, 50% MSFT"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      metric: "sortino_ratio"
+      risk_free_rate: 0.02
+      period: "1y"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "sortino_ratio"
+      value:
+        type: "float"
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      value_finite: true
+      weights_sum_to_one: true
+
+  # Test 25: Comprehensive risk report
+  - id: "portfolio_025"
+    name: "Generate comprehensive risk report"
+    input:
+      query: "Generate comprehensive risk report for portfolio: 40% AAPL, 30% MSFT, 30% GOOGL"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.4
+        - symbol: "MSFT"
+          weight: 0.3
+        - symbol: "GOOGL"
+          weight: 0.3
+      report_type: "comprehensive"
+    expected_output:
+      type: "comprehensive_risk_report"
+      metrics:
+        type: "dict"
+        min_keys: 5
+      required_metrics: ["volatility", "beta", "max_drawdown", "var", "sharpe_ratio"]
+      all_metrics_present: true
+      status: "success"
+    validation:
+      required_fields: ["metrics", "all_metrics_present", "status"]
+      all_required_metrics_present: true
+      weights_sum_to_one: true

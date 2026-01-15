@@ -1,0 +1,51 @@
+# Example Hard Evaluation Tests - Portfolio & Risk Agent
+# These examples match the specific format requested with exact expected values and tolerances
+
+examples:
+  # Example 1: Maximum drawdown with percentage tolerance
+  - id: "portfolio_example_001"
+    name: "Compute maximum drawdown with tolerance"
+    input:
+      query: "Compute the maximum drawdown of a 60/40 portfolio (SPY/BND) in 2022"
+      portfolio:
+        - symbol: "SPY"
+          weight: 0.6
+        - symbol: "BND"
+          weight: 0.4
+      year: 2022
+      metric: "max_drawdown"
+    expected_output:
+      type: "portfolio_metric"
+      metric: "max_drawdown"
+      value:
+        type: "float"
+        value: -0.18  # -18%
+        tolerance_percentage: 0.02  # ±2% tolerance
+      status: "success"
+    validation:
+      required_fields: ["metric", "value", "status"]
+      percentage_tolerance_check: true
+      weights_sum_to_one: true
+
+  # Example 2: Constraint violation check (binary)
+  - id: "portfolio_example_002"
+    name: "Check volatility constraint violation"
+    input:
+      query: "Does the proposed portfolio violate a max-volatility constraint of 15%?"
+      portfolio:
+        - symbol: "AAPL"
+          weight: 0.5
+        - symbol: "MSFT"
+          weight: 0.5
+      constraint:
+        type: "max_volatility"
+        value: 0.15
+    expected_output:
+      type: "constraint_check"
+      constraint_violated: false  # Exact match: NO = false
+      answer: "NO"  # Alternative text format
+      status: "success"
+    validation:
+      required_fields: ["constraint_violated", "status"]
+      exact_match: true
+      weights_sum_to_one: true

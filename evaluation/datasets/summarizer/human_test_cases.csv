@@ -1,0 +1,8 @@
+id,query,expected_output_type,context
+summarizer_human_001,"Should I invest in AAPL? Consider market data, fundamentals, and risk","investment_recommendation","Comprehensive investment decision"
+summarizer_human_002,"Compare AAPL and MSFT as investment options considering all factors","comparative_investment_analysis","Comparative investment analysis"
+summarizer_human_003,"Is now a good time to buy GOOGL? Analyze current market conditions and fundamentals","timing_analysis_with_recommendation","Investment timing analysis"
+summarizer_human_004,"What is the investment outlook for technology sector? Consider AAPL, MSFT, GOOGL","sector_outlook_analysis","Sector-level investment outlook"
+summarizer_human_005,"Should I rebalance my portfolio of 50% AAPL, 50% MSFT? Consider risk and fundamentals","rebalancing_recommendation_with_analysis","Portfolio rebalancing decision"
+summarizer_human_006,"What are the key risks and opportunities for investing in TSLA?","risk_opportunity_analysis","Risk and opportunity assessment"
+summarizer_human_007,"Is AAPL overvalued or undervalued? Provide comprehensive analysis","valuation_analysis_with_verdict","Valuation assessment"

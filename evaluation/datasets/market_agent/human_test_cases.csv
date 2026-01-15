@@ -1,0 +1,8 @@
+id,query,expected_output_type,context
+market_human_001,"Get the closing price of AAPL on 2024-01-15 and explain any data quality issues","price_data_with_quality_notes","Market data retrieval with quality assessment"
+market_human_002,"Compare the volatility of AAPL and MSFT over the last 6 months and explain which is riskier","comparative_volatility_analysis","Comparative risk analysis"
+market_human_003,"Get daily returns for GOOGL from 2024-01-01 to 2024-01-31 and identify any anomalies","returns_with_anomaly_detection","Time series analysis with anomaly detection"
+market_human_004,"Calculate the correlation between TSLA and the S&P 500 over the last year and explain the relationship","correlation_analysis_with_interpretation","Correlation analysis with interpretation"
+market_human_005,"Get FX rate for USD/EUR on 2024-01-15 and explain how it compares to the 30-day average","fx_rate_with_comparison","FX data with historical context"
+market_human_006,"Retrieve OHLCV data for AAPL on 2024-01-15 and explain what the data indicates about trading activity","ohlcv_with_interpretation","Trading activity analysis"
+market_human_007,"Get adjusted close prices for MSFT from 2024-01-01 to 2024-01-31 and explain why adjusted prices matter","adjusted_prices_with_explanation","Adjusted price data with education"
