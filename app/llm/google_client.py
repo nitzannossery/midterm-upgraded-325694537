@@ -15,7 +15,36 @@ class GoogleLLMClient:
             raise ValueError("GOOGLE_API_KEY not set in environment variables")
         
         genai.configure(api_key=settings.google_api_key)
-        self.model = genai.GenerativeModel(settings.google_model)
+        
+        # Try to initialize the model, with fallback to available models
+        model_initialized = False
+        model_name = settings.google_model
+        
+        # List of models to try (in order of preference)
+        models_to_try = [
+            model_name,  # Try user-specified model first
+            "gemini-1.5-flash",  # Fast and efficient
+            "gemini-1.5-pro",    # More capable
+            "gemini-pro",         # Legacy name
+        ]
+        
+        for model_to_try in models_to_try:
+            try:
+                self.model = genai.GenerativeModel(model_to_try)
+                # Test with a simple generation to verify it works
+                _ = self.model.generate_content("test", generation_config={"max_output_tokens": 1})
+                model_initialized = True
+                self.actual_model_name = model_to_try
+                if model_to_try != model_name:
+                    print(f"Note: Using model '{model_to_try}' instead of '{model_name}'")
+                break
+            except Exception as e:
+                if model_to_try == models_to_try[-1]:  # Last model failed
+                    raise ValueError(f"Could not initialize any Gemini model. Last error: {str(e)}")
+                continue
+        
+        if not model_initialized:
+            raise ValueError("Could not initialize any Gemini model")
     
     def generate(
         self,

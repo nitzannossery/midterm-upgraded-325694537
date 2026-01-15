@@ -17,6 +17,6 @@ class Settings(BaseModel):
     
     # API Keys
     google_api_key: str = os.getenv("GOOGLE_API_KEY", "")
-    google_model: str = os.getenv("GOOGLE_MODEL", "gemini-pro")  # Default to gemini-pro
+    google_model: str = os.getenv("GOOGLE_MODEL", "gemini-1.5-flash")  # Default to gemini-1.5-flash (faster) or gemini-1.5-pro (more capable)
 
 settings = Settings()
