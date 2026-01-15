@@ -3,7 +3,7 @@ import os
 
 class Settings(BaseModel):
     # "demo" shows capabilities; "live" runs inference pipeline
-    ui_mode: str = os.getenv("UI_MODE", "live").lower()
+    ui_mode: str = os.getenv("UI_MODE", "live").lower()  # Default: live
 
     # Optional: turn retrieval on/off for quick dev
     enable_retrieval: bool = os.getenv("ENABLE_RETRIEVAL", "true").lower() == "true"

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Multi-Agent System - User Interface</title>
+    <title>Financial Multi-Agent System - Inference UI</title>
     <style>
         * {
             margin: 0;
@@ -160,10 +160,15 @@
             color: white;
         }
         
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: #5568d3;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
         }
         
         .btn-secondary {
@@ -177,9 +182,6 @@
         
         .response-section {
             margin-top: 40px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 12px;
             display: none;
             animation: fadeIn 0.5s ease-in;
         }
@@ -199,9 +201,45 @@
             }
         }
         
-        .response-section h3 {
-            color: #667eea;
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e9ecef;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
         
         .response-content {
@@ -224,6 +262,58 @@
             border-radius: 4px;
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
+        }
+        
+        .agent-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .agent-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .source-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .source-item strong {
+            color: #495057;
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        
+        .error {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin-bottom: 20px;
+            color: #721c24;
         }
         
         .loading {
@@ -254,7 +344,7 @@
     <div class="container">
         <div class="header">
             <h1>🤖 Financial Multi-Agent System</h1>
-            <p>Ask Real Financial Questions - Inference Mode</p>
+            <p>Inference UI - Real User Queries</p>
         </div>
         
         <div class="info-banner">
@@ -306,15 +396,35 @@
                 </div>
                 
                 <div class="actions">
-                    <button class="btn btn-primary" onclick="submitQuery()">Submit Query</button>
+                    <button id="submitBtn" class="btn btn-primary" onclick="submitQuery()">Run Analysis</button>
                     <button class="btn btn-secondary" onclick="clearQuery()">Clear</button>
                 </div>
             </div>
             
             <div id="responseSection" class="response-section">
-                <h3>Response</h3>
-                <div id="responseContent" class="response-content">
-                    <div class="loading">Processing your query...</div>
+                <h3 style="color: #667eea; margin-bottom: 20px;">Analysis Results</h3>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('answer')">Final Answer</button>
+                    <button class="tab" onclick="switchTab('agents')">Agents</button>
+                    <button class="tab" onclick="switchTab('sources')">Sources</button>
+                    <button class="tab" onclick="switchTab('debug')">Debug</button>
+                </div>
+                
+                <div id="tabAnswer" class="tab-content active">
+                    <div id="answerContent" class="response-content"></div>
+                </div>
+                
+                <div id="tabAgents" class="tab-content">
+                    <div id="agentsContent"></div>
+                </div>
+                
+                <div id="tabSources" class="tab-content">
+                    <div id="sourcesContent"></div>
+                </div>
+                
+                <div id="tabDebug" class="tab-content">
+                    <div id="debugContent" class="debug-info"></div>
                 </div>
             </div>
         </div>
@@ -329,6 +439,15 @@
     </div>
     
     <script>
+        // API endpoint - change this to your FastAPI server URL
+        const API_URL = window.location.origin.includes('localhost') 
+            ? 'http://localhost:8000' 
+            : (window.location.protocol === 'file:' 
+                ? 'http://localhost:8000' 
+                : window.location.origin.replace(/\/[^/]*$/, ':8000'));
+
+        let currentResponse = null;
+
         function setQuery(query) {
             document.getElementById('queryInput').value = query;
         }
@@ -336,13 +455,24 @@
         function clearQuery() {
             document.getElementById('queryInput').value = '';
             document.getElementById('responseSection').classList.remove('active');
+            currentResponse = null;
         }
         
-        // API endpoint - change this to your FastAPI server URL
-        const API_URL = window.location.origin.includes('localhost') 
-            ? 'http://localhost:8000' 
-            : window.location.origin.replace(/\/[^/]*$/, ':8000');
-
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active');
+            
+            // Populate tab content if needed
+            if (currentResponse && tabName === 'debug') {
+                displayDebugInfo(currentResponse);
+            }
+        }
+        
         async function submitQuery() {
             const query = document.getElementById('queryInput').value.trim();
             
@@ -353,118 +483,158 @@
             
             // Show response section
             const responseSection = document.getElementById('responseSection');
-            const responseContent = document.getElementById('responseContent');
+            const answerContent = document.getElementById('answerContent');
+            const submitBtn = document.getElementById('submitBtn');
             
             // Make sure section is visible
             responseSection.classList.add('active');
             responseSection.style.display = 'block';
             
-            // Show loading state
-            responseContent.innerHTML = '<div class="loading">🔄 Processing your query through the multi-agent system...</div>';
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+            answerContent.innerHTML = '<div class="loading">🔄 Processing your query through the multi-agent system...</div>';
+            
+            // Switch to answer tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('tabAnswer').classList.add('active');
             
             // Scroll to response
             responseSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             
             try {
-                // Call FastAPI backend
+                // Call FastAPI backend with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+                
                 const response = await fetch(`${API_URL}/analyze`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ query: query })
+                    body: JSON.stringify({ query: query }),
+                    signal: controller.signal
                 });
                 
+                clearTimeout(timeoutId);
+                
                 if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
+                    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                    throw new Error(`API error (${response.status}): ${errorData.message || errorData.detail || 'Unknown error'}`);
                 }
                 
                 const data = await response.json();
+                currentResponse = data;
                 displayResponse(data, query);
                 
             } catch (error) {
                 console.error('Error calling API:', error);
-                responseContent.innerHTML = `
-                    <div style="line-height: 1.8; color: #dc3545;">
-                        <strong>❌ Error connecting to API:</strong><br><br>
-                        ${error.message}<br><br>
-                        <strong>Make sure the FastAPI server is running:</strong><br>
-                        <code>uvicorn app.api:app --reload --port 8000</code><br><br>
-                        <em>Falling back to demo response...</em>
-                    </div>`;
                 
-                // Fallback to demo response
-                setTimeout(() => {
-                    const demoResponse = generateDemoResponse(query);
-                    responseContent.innerHTML = demoResponse;
-                }, 1000);
+                if (error.name === 'AbortError') {
+                    answerContent.innerHTML = `
+                        <div class="error">
+                            <strong>⏱️ Request Timeout</strong><br><br>
+                            The request took too long. Please try a simpler query or check if the API server is running.
+                        </div>`;
+                } else {
+                    answerContent.innerHTML = `
+                        <div class="error">
+                            <strong>❌ Error connecting to API:</strong><br><br>
+                            ${error.message}<br><br>
+                            <strong>Make sure the FastAPI server is running:</strong><br>
+                            <code>uvicorn app.api:app --reload --port 8000</code><br><br>
+                            <em>Or run: <code>./run_api.sh</code></em>
+                        </div>`;
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Run Analysis';
             }
         }
         
         function displayResponse(data, query) {
-            const responseContent = document.getElementById('responseContent');
-            
-            let html = `<div style="line-height: 1.8;">
-                <strong>📋 Your Query:</strong><br><em>"${query}"</em>
-            </div><br>`;
-            
-            // Mode indicator
-            if (data.mode === 'demo') {
-                html += `<div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                    <strong>⚠️ Demo Mode:</strong> ${data.warnings.join(', ')}
-                </div>`;
-            }
-            
             // Warnings
+            let warningsHtml = '';
             if (data.warnings && data.warnings.length > 0 && data.mode !== 'demo') {
-                html += `<div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                warningsHtml = `<div class="warning">
                     <strong>⚠️ Warnings:</strong><br>${data.warnings.join('<br>')}
                 </div>`;
             }
             
-            // Final answer
-            html += `<hr style="margin: 20px 0; border: none; border-top: 1px solid #e9ecef;"><br>`;
-            html += `<div style="line-height: 1.8;">
-                <strong>📝 Final Answer:</strong><br><br>
-                ${data.final_answer}
-            </div>`;
+            // Final Answer (formatted markdown-like)
+            const answerContent = document.getElementById('answerContent');
+            let answerHtml = warningsHtml;
+            answerHtml += `<div style="line-height: 1.8;">
+                <strong>📋 Your Query:</strong><br><em>"${query}"</em>
+            </div><br><hr style="margin: 20px 0; border: none; border-top: 1px solid #e9ecef;"><br>`;
+            answerHtml += `<div style="white-space: pre-wrap; line-height: 1.8;">${formatMarkdown(data.final_answer)}</div>`;
+            answerContent.innerHTML = answerHtml;
             
-            // Agent outputs
+            // Agent Outputs
+            const agentsContent = document.getElementById('agentsContent');
             if (data.agent_outputs && data.agent_outputs.length > 0) {
-                html += `<br><hr style="margin: 20px 0; border: none; border-top: 1px solid #e9ecef;"><br>`;
-                html += `<strong>🤖 Agent Outputs:</strong><br><br>`;
-                
-                data.agent_outputs.forEach((agent, idx) => {
-                    html += `<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
-                        <strong>${agent.agent}</strong><br>
-                        <div style="margin-top: 8px;">${agent.content}</div>`;
-                    
-                    if (agent.sources && agent.sources.length > 0) {
-                        html += `<div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
-                            <strong>Sources:</strong><br>`;
-                        agent.sources.forEach(source => {
-                            html += `• ${source.title}${source.snippet ? ': ' + source.snippet : ''}<br>`;
-                        });
-                        html += `</div>`;
+                let agentsHtml = '';
+                data.agent_outputs.forEach(agent => {
+                    agentsHtml += `
+                        <div class="agent-card">
+                            <h4>${agent.agent}</h4>
+                            <div style="white-space: pre-wrap;">${agent.content}</div>
+                            ${agent.sources && agent.sources.length > 0 ? `
+                                <div style="margin-top: 10px; font-size: 0.9em; color: #6c757d;">
+                                    <strong>Sources:</strong> ${agent.sources.length}
+                                </div>
+                            ` : ''}
+                        </div>`;
+                });
+                agentsContent.innerHTML = agentsHtml;
+            } else {
+                agentsContent.innerHTML = '<div class="response-content">No agent outputs available.</div>';
+            }
+            
+            // Sources
+            const sourcesContent = document.getElementById('sourcesContent');
+            const allSources = [];
+            if (data.agent_outputs) {
+                data.agent_outputs.forEach(agent => {
+                    if (agent.sources) {
+                        allSources.push(...agent.sources);
                     }
-                    html += `</div>`;
                 });
             }
             
-            responseContent.innerHTML = html;
+            if (allSources.length > 0) {
+                let sourcesHtml = '';
+                allSources.forEach((source, idx) => {
+                    sourcesHtml += `
+                        <div class="source-item">
+                            <strong>${idx + 1}. ${source.title}</strong>
+                            ${source.snippet ? `<div style="margin-top: 5px; color: #6c757d;">${source.snippet}</div>` : ''}
+                            ${source.url ? `<div style="margin-top: 5px;"><a href="${source.url}" target="_blank">${source.url}</a></div>` : ''}
+                        </div>`;
+                });
+                sourcesContent.innerHTML = sourcesHtml;
+            } else {
+                sourcesContent.innerHTML = '<div class="response-content">No sources retrieved.</div>';
+            }
         }
         
-        function generateDemoResponse(query) {
-            // Fallback demo response if API is not available
-            return `<div style="line-height: 1.8;">
-                <strong>📋 Your Query:</strong><br><em>"${query}"</em>
-            </div><br><hr style="margin: 20px 0; border: none; border-top: 1px solid #e9ecef;"><br>
-            <div style="line-height: 1.8;">
-                <strong>⚠️ Demo Mode (API not connected):</strong><br><br>
-                This is a fallback response. To get real answers, start the FastAPI server:<br><br>
-                <code>uvicorn app.api:app --reload --port 8000</code><br><br>
-                Then refresh this page and try again.
-            </div>`;
+        function displayDebugInfo(data) {
+            const debugContent = document.getElementById('debugContent');
+            debugContent.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function formatMarkdown(text) {
+            // Simple markdown formatting
+            return text
+                .replace(/^## (.*$)/gim, '<h3 style="color: #667eea; margin-top: 20px; margin-bottom: 10px;">$1</h3>')
+                .replace(/^### (.*$)/gim, '<h4 style="color: #495057; margin-top: 15px; margin-bottom: 8px;">$1</h4>')
+                .replace(/^\* (.*$)/gim, '<li style="margin-left: 20px;">$1</li>')
+                .replace(/^\• (.*$)/gim, '<li style="margin-left: 20px;">$1</li>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '<br><br>')
+                .replace(/\n/g, '<br>');
         }
         
         // Allow Enter+Shift for new line, Enter alone to submit
