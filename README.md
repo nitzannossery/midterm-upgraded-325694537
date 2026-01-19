@@ -113,6 +113,47 @@ python evaluation/runners/run_llm_evals.py --agent fundamental_news
 python evaluation/runners/run_llm_evals.py --sample-size 5
 ```
 
+## Yahoo Finance Stock Market Data Script
+
+This repository includes a standalone Python script for fetching and displaying stock market data using the yfinance library.
+
+### What the Script Does
+
+The `yahoo_finance.py` script demonstrates how to:
+- Fetch real-time stock information for Apple (AAPL)
+- Retrieve current price and market capitalization
+- Download historical price data for the last month
+- Compare multiple stocks (AAPL, MSFT, GOOGL) over a one-year period
+
+### Installation
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+This will install `yfinance` along with other project dependencies.
+
+### Running the Script
+
+Execute the script from the repository root:
+
+```bash
+python yahoo_finance.py
+```
+
+### Expected Output
+
+When you run the script, you will see:
+
+1. **Current Apple Stock Price**: The latest trading price for AAPL
+2. **Apple's Market Capitalization**: Total market value in dollars
+3. **One Month Historical Data**: Daily OHLCV (Open, High, Low, Close, Volume) data for Apple stock
+4. **Multi-Stock Comparison**: One year of closing prices for Apple (AAPL), Microsoft (MSFT), and Google (GOOGL)
+
+**Note**: The script fetches live data from Yahoo Finance, so results will vary based on current market conditions and the time of execution.
+
 ## Agent Integration
 
 To integrate your agents with the evaluation framework, you need to implement the `_call_agent` method in each runner:
