@@ -22,7 +22,7 @@ except Exception as e:
 print("\nMulti-Stock Comparison (1 year - Closing Prices):")
 try:
     data = yf.download("AAPL MSFT GOOGL", period="1y")
-    if not data.empty and 'Close' in data.columns:
+    if not data.empty and 'Close' in data.columns.get_level_values(0):
         print(data['Close'])
     else:
         print("No data available")
