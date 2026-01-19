@@ -12,10 +12,19 @@ except Exception as e:
 
 # Historical data
 print("\nHistorical Data (1 month):")
-hist = apple.history(period="1mo")  # last month
-print(hist)
+try:
+    hist = apple.history(period="1mo")  # last month
+    print(hist)
+except Exception as e:
+    print(f"Error fetching historical data: {e}")
 
 # Download multiple stocks
 print("\nMulti-Stock Comparison (1 year - Closing Prices):")
-data = yf.download("AAPL MSFT GOOGL", period="1y")
-print(data['Close'])
+try:
+    data = yf.download("AAPL MSFT GOOGL", period="1y")
+    if not data.empty and 'Close' in data.columns:
+        print(data['Close'])
+    else:
+        print("No data available")
+except Exception as e:
+    print(f"Error downloading multi-stock data: {e}")
