@@ -25,4 +25,4 @@ requests>=2.31.0
 python-dotenv>=1.0.0
 
 # Stock market data
-yfinance
+yfinance>=0.2.0
