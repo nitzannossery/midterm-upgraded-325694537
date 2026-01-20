@@ -82,17 +82,17 @@ async def analyze(req: AnalyzeRequest, request: Request):
 
         # Live inference with timeout protection
         try:
-            # Run orchestrator with timeout (25 seconds max)
+            # Run orchestrator with timeout (extended to 55 seconds max to better support broad queries)
             # Use asyncio.to_thread to run sync code in async context
             try:
                 result = await asyncio.wait_for(
                     asyncio.to_thread(orch.run, req.query),
-                    timeout=25.0
+                    timeout=55.0
                 )
             except asyncio.TimeoutError:
                 raise HTTPException(
                     status_code=504,
-                    detail="Request timeout: Analysis took too long (>25s). Please try a simpler query."
+                    detail="Request timeout: Analysis took too long (>55s). Please try a simpler or more focused query."
                 )
             
             elapsed_time = time.time() - start_time

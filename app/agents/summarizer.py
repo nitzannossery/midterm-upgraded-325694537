@@ -29,31 +29,110 @@ class SummarizerAgent(Agent):
         return AgentOutput(agent=self.name, content=content, sources=sources)
     
     def _generate_llm_summary(self, query: str, agent_outputs: List[AgentOutput], sources: List[Source]) -> str:
-        """Generate summary using Google Gemini LLM."""
+        """Generate summary using Google Gemini LLM with enhanced support for broad queries and needle extraction."""
         system_prompt = """You are a financial analyst summarizing multi-agent analysis results.
+
+For comprehensive (broad) queries:
+- Synthesize information from ALL relevant agents
+- Connect insights across different domains (market data, fundamentals, risk)
+- Provide a unified, coherent answer
+
+For specific (needle) queries:
+- Extract and highlight the exact value or information requested
+- Cite the specific source where the value was found
+- Verify value consistency across sources
+
+CRITICAL RULES:
+1. NEVER invent or estimate values - only use data from retrieved sources
+2. If a specific value was requested but not found, explicitly state: "No verified source found for this claim"
+3. Always cite sources when referencing specific numbers or facts
+4. For tabular data, present it clearly and cite the source
+
 Provide a structured summary with:
-1. Investment Thesis (3 key points)
-2. Key Risks (3 main risks)
-3. Evidence & Sources (list sources used)
+1. Direct Answer (if needle query) OR Investment Thesis (if broad query)
+2. Key Evidence & Data Points (with sources)
+3. Key Risks (if applicable)
 4. Recommendation (actionable advice)
 
 Format the response clearly with sections."""
         
+        # Detect query type
+        query_lower = query.lower()
+        is_needle_query = any(keyword in query_lower for keyword in 
+                             ["what was", "what is", "according to", "from", "retrieved", "extracted"])
+        is_broad_query = any(keyword in query_lower for keyword in 
+                            ["analyze", "comprehensive", "overall", "consider", "evaluate", "should i"])
+        
         # Build context from agent outputs
         agent_context = []
         for agent_out in agent_outputs:
-            agent_context.append(f"{agent_out.agent}:\n{agent_out.content}")
+            agent_name = agent_out.agent
+            content = agent_out.content
+            
+            # Highlight extracted values in agent outputs
+            if "extracted" in content.lower() or "retrieved" in content.lower():
+                content = f"[CONTAINS SPECIFIC VALUES]\n{content}"
+            
+            agent_context.append(f"## {agent_name}\n{content}")
         
+        # Build sources context with emphasis on needle data
         sources_context = []
         for source in sources:
-            sources_context.append(f"- {source.title}: {source.snippet or 'No snippet available'}")
+            source_text = f"**{source.title}**"
+            if source.snippet:
+                # Check if snippet contains specific values (needle)
+                if any(char.isdigit() for char in source.snippet):
+                    source_text += f": [CONTAINS SPECIFIC VALUE] {source.snippet}"
+                else:
+                    source_text += f": {source.snippet}"
+            if source.url:
+                source_text += f" | Source: {source.url}"
+            sources_context.append(source_text)
         
-        prompt = f"""Query: {query}
+        # Build query-specific prompt
+        if is_needle_query:
+            prompt = f"""Specific Query (Needle in Haystack): {query}
+
+This query requires extracting a specific value or piece of information.
 
 Agent Analysis Results:
 {chr(10).join(agent_context)}
 
-Sources:
+Retrieved Sources:
+{chr(10).join(sources_context) if sources_context else 'No sources retrieved'}
+
+TASK:
+1. Find the EXACT value or information requested in the query
+2. Cite the specific source where you found it
+3. If the value appears in multiple sources, verify consistency
+4. If the value is NOT found in any source, explicitly state: "No verified source found"
+
+Provide the direct answer first, then supporting evidence."""
+        elif is_broad_query:
+            prompt = f"""Comprehensive Query (Broad Analysis): {query}
+
+This query requires synthesizing information from multiple sources and agents.
+
+Agent Analysis Results:
+{chr(10).join(agent_context)}
+
+Retrieved Sources:
+{chr(10).join(sources_context) if sources_context else 'No sources retrieved'}
+
+TASK:
+1. Synthesize insights from ALL relevant agents
+2. Connect market data with fundamentals and risk analysis
+3. Provide a comprehensive, unified answer
+4. Always cite sources for specific claims or numbers
+
+Provide a comprehensive financial analysis summary."""
+        else:
+            prompt = f"""Query: {query}
+
+Agent Analysis Results:
+{chr(10).join(agent_context)}
+
+Retrieved Sources:
 {chr(10).join(sources_context) if sources_context else 'No sources retrieved'}
 
 Please provide a comprehensive financial analysis summary."""
@@ -62,8 +141,8 @@ Please provide a comprehensive financial analysis summary."""
             summary = self.llm_client.generate(
                 prompt=prompt,
                 system_prompt=system_prompt,
-                temperature=0.3,  # Lower temperature for more focused analysis
-                max_tokens=1000
+                temperature=0.2,  # Lower temperature for more accurate data extraction
+                max_tokens=1200  # More tokens for comprehensive summaries
             )
             return summary
         except Exception as e:

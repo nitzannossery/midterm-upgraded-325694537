@@ -1,0 +1,44 @@
+{
+  "broad_queries": [
+    "Should I invest in AAPL? Consider market data, fundamentals, and risk",
+    "Analyze AAPL investment opportunity comprehensively",
+    "Provide comprehensive analysis for GOOGL covering all relevant factors",
+    "Is AAPL overvalued or undervalued? Provide comprehensive analysis",
+    "Evaluate Microsoft as an investment opportunity considering all aspects",
+    "Should I buy Apple stock? Check everything - prices, financials, risks",
+    "Give me investment recommendation for Tesla with full analysis",
+    "What is the investment outlook for NVIDIA? Consider all factors"
+  ],
+  "needle_queries": [
+    "According to the latest earnings report, what was Apple's operating income?",
+    "What was Microsoft's revenue in FY2023 according to their annual filing?",
+    "What is Apple's gross margin reported in the last quarterly filing?",
+    "What was Google's EPS in Q3 2023 according to their earnings report?",
+    "What was Amazon's free cash flow in FY2023?",
+    "What is Meta's debt-to-equity ratio according to their balance sheet?",
+    "What was NVIDIA's net income according to their most recent 10-K filing?",
+    "What was Netflix's EPS in Q3 2023?",
+    "What is Intel's current ratio according to their latest financial statements?",
+    "What was Salesforce's free cash flow in FY2023?"
+  ],
+  "tabular_queries": [
+    "Get current price and market cap for AAPL",
+    "What is the current price of AAPL?",
+    "Get price data for AAPL from 2024-01-01 to 2024-01-31",
+    "What is the historical price and volume for MSFT for the last 90 days?",
+    "Get current price, market cap, and P/E ratio for GOOGL",
+    "What is the daily return of AAPL between 2024-01-02 and 2024-01-03?",
+    "What is the 30-day volatility of SPY ending on 2024-03-31?",
+    "What are the top 5 sources for GOOGL price data?",
+    "Fetch USD/EUR exchange rate on 2024-02-01",
+    "Get historical prices, volume, and returns for TSLA for the last month",
+    "Get price data for multiple stocks: AAPL, MSFT, GOOGL",
+    "What is the current ratio and debt-to-equity for AAPL?"
+  ],
+  "combined_queries": [
+    "Give me comprehensive analysis on Apple - including current price, fundamental data from latest reports, and risk assessment",
+    "What is the current price of AAPL and what was their operating income in the last quarter?",
+    "Should I invest in Microsoft? Give me current price, fundamental data, and risk analysis",
+    "Give me full analysis on Google - price, revenue from annual report, and investment recommendation"
+  ]
+}
